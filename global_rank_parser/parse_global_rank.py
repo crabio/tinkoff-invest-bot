@@ -1,103 +1,77 @@
-#!/usr/bin/env python
-# coding: utf-8
+# To add a new cell, type '# %%'
+# To add a new markdown cell, type '# %% [markdown]'
+# %% [markdown]
+# ### How does it work:
+# * import required libraries;
+# * get data from Forbes. Link to request for top 2000 companies;
+# * filtering data fields for each company;
+# * create data frame;
+# * save as parquet file
 
-# In[1]:
-
-
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium import webdriver
-from time import sleep
+# %%
 import pandas as pd
+import json
+import requests
 import os
 
-# In[2]:
+
+# %%
+# Request settings
+params={
+    "limit": 2000
+}
+URL = "https://www.forbes.com/forbesapi/org/global2000/2020/position/true.json"
 
 
-# In[12]:
+# %%
+# Get data from Forbes website
+response = requests.get(URL, params = params)
+print(response.status_code)
 
 
-CHROMEDRIVER_PATH = './../chromedriver'
-URL = 'https://www.forbes.com/global2000/'
+# %%
+# List of organization data
+list_of_organization_data = []
 
-# Prepare DataFrame
-df_list = []
+# Get json from response message
+original_json = response.json()
 
-# Init browser instance
-browser = webdriver.Chrome(CHROMEDRIVER_PATH)
+# Get only list of all organizations
+organizations_json = original_json["organizationList"]["organizationsLists"]
 
-# Get page
-browser.get(URL)
-# Reload page
-browser.refresh()
+# Loop for filtering data about ecach organization
+for organization in organizations_json:
+    filtered_organization={}
+    filtered_organization["Company"] = organization["organizationName"]
+    filtered_organization["Country"] = organization["country"]
+    filtered_organization["Industry"] = organization["industry"]
+    filtered_organization["Sales"] = organization["revenue"] * 1000
+    filtered_organization["Profits"] = organization["profits"] * 1000
+    filtered_organization["Assets"] = organization["assets"] * 1000
+    filtered_organization["Market Value"] = organization["marketValue"] * 1000
 
-delay = 3  # seconds
-pages_count = 5
-parse_timeout_max = 10
-df = pd.DataFrame()
-try:
-    last_id = 0
-    for page_i in range(pages_count):
-        # Wait table loading
-        WebDriverWait(browser, delay).until(
-            EC.presence_of_element_located((By.XPATH, '//table//tr//td')))
-        # Get table root
-        table_element = WebDriverWait(browser, delay).until(
-            EC.presence_of_element_located((By.XPATH, '//table')))
-
-        # Parse table
-        table_html_string = table_element.get_attribute('outerHTML')
-
-        # Parse table untill timeout or new data
-        parse_timeout = parse_timeout_max
-
-        while df.empty or (last_id == df.iloc[-1]['Rank']):
-            # Parse table
-            df = pd.read_html(table_html_string)[0]
-
-            # Check timeout
-            parse_timeout -= 1
-            if parse_timeout == 0:
-                raise RuntimeError("No new data for parsing.")
-
-            # Wait reloading
-            sleep(1)
-
-        print("Last parsed rank: %d" % last_id)
-        # Save new id
-        last_id = df.iloc[-1]['Rank']
-
-        # Add parsed table
-        df_list.append(pd.read_html(table_html_string)[0])
-
-        # Click NEXT button
-        next_btn = browser.find_element_by_xpath(
-            "//a[@ng-switch-when='next']").click()
-
-except TimeoutException:
-    print("Loading took too much time!")
-
-# Close browser
-browser.close()
-browser.quit()
-
-print("Parsed %d lists" % len(df_list))
+    # Add filtered data to list
+    list_of_organization_data.append(filtered_organization)
 
 
-# In[13]:
+# %%
+# Create DataFrame from list of oraganizations dictionaries
+df = pd.DataFrame(list_of_organization_data)
 
-
-# Concat
-df = pd.concat(df_list)
 # Clear
-df = df.dropna(axis=1, how='all').dropna(axis=0, how='all')
-df
+df.dropna(axis=1, how='all').dropna(axis=0, how='all')
 
 
-# In[49]:
+# %%
+# File save settings
+save_dir="../data"
+file_name = "companies_rank.parquet"
 
-
+# Create "data" directory if it isn't exist
+if not os.path.exists(save_dir):
+    os.makedirs(save_dir)
+    
 # Save to parquet
-df.to_parquet("../data/companies_rank.parquet")
+df.to_parquet('{}/{}'.format(save_dir,file_name))
+
+
