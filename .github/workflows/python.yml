@@ -47,6 +47,3 @@ jobs:
         source: .
         # File containing a list of Python packages to be installed before scanning
         requirements: requirements.txt
-    - name: Test with pytest
-      run: |
-        pytest
