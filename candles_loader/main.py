@@ -1,6 +1,7 @@
 import tinvest
 import pandas as pd
 
+TOKEN = ""
 client = tinvest.SyncClient(TOKEN, use_sandbox=True)
 api = tinvest.MarketApi(client)
 
