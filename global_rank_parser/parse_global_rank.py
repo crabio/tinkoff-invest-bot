@@ -67,6 +67,6 @@ file_name = "companies_rank.parquet"
 # Create "data" directory if it isn't exist
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
-    
+
 # Save to parquet
 df.to_parquet('{}/{}'.format(save_dir, file_name))
