@@ -10,7 +10,7 @@ response = api.market_stocks_get()  # requests.Response
 if response.status_code == 200:
     # Parse
     markets_instruments_list = response.parse_json().payload
-    
+
     markets_instruments_data = [{
             'currency': markets_instrument.currency,
             'figi': markets_instrument.figi,
