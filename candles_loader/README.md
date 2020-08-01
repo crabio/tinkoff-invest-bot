@@ -8,10 +8,4 @@ Programm for loading historical candles from Tinkoff API.
 
 ## Development
 
-Development building steps:
-
-* `rm -rf Gomfile`
-* `gom gen gomfile`
-    NOTICE. If you have errors, install packages manually with `go get ...`
-* `gom install`
-* `gom build`
+For building use: `bash scripts/build.sh`

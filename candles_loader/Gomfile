@@ -1,3 +1,4 @@
+gom 'github.com/TinkoffCreditSystems/invest-openapi-go-sdk', :commit => '3cc3cf4c0da1589ece03a0e5b73ad6a94eabdc7e'
 gom 'github.com/ghodss/yaml', :commit => '25d852aebe32c875e9c044af3eef9c7dc6bc777f'
 gom 'github.com/gocarina/gocsv', :commit => '46266ca37bd38a63bc2844e3aeb7ec72a2e998fa'
 gom 'github.com/gorilla/websocket', :commit => 'b65e62901fc1c0d968042419e74789f6af455eb9'
