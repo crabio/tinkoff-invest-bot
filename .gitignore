@@ -128,8 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Tinkoff TOKEN
-token.txt
+# Configuration
+config.json
 
 # Chrome driver
 chromedriver

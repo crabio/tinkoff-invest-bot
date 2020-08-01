@@ -1,0 +1,6 @@
+gom 'github.com/ghodss/yaml', :commit => '25d852aebe32c875e9c044af3eef9c7dc6bc777f'
+gom 'github.com/gocarina/gocsv', :commit => '46266ca37bd38a63bc2844e3aeb7ec72a2e998fa'
+gom 'github.com/gorilla/websocket', :commit => 'b65e62901fc1c0d968042419e74789f6af455eb9'
+gom 'github.com/pkg/errors', :commit => '27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7'
+gom 'github.com/tkanos/gonfig', :commit => '896f3d81fadfe082262467a1c22fd43278806a02'
+gom 'gopkg.in/yaml.v2', :commit => '0b1645d91e851e735d3e23330303ce81f70adbe3'

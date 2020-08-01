@@ -1,0 +1,5 @@
+# Ignore Go packages
+vendor
+
+# Ignore Binary
+candles_loader

@@ -62,11 +62,11 @@ df.dropna(axis=1, how='all').dropna(axis=0, how='all')
 # %%
 # File save settings
 save_dir = "../data"
-file_name = "companies_rank.parquet"
+file_name = "companies_rank.csv"
 
 # Create "data" directory if it isn't exist
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 
-# Save to parquet
-df.to_parquet('{}/{}'.format(save_dir, file_name))
+# Save to CSV
+df.to_csv('{}/{}'.format(save_dir, file_name))
