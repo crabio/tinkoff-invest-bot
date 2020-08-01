@@ -1,5 +1,5 @@
 {
-    "Token": "t.zGsYDRHCjwAhxDPJuaQofGAMoc7NdXdS2whURF-vcO5IBjY1Pa5AdglMa5tbLxVwCcc8Lo5hk7o-6PgMpL5YMw",
-    "IsSandbox": true,
+    "SandboxToken": "t.zGsYDRHCjwAhxDPJuaQofGAMoc7NdXdS2whURF-vcO5IBjY1Pa5AdglMa5tbLxVwCcc8Lo5hk7o-6PgMpL5YMw",
+    "ProductionToken": "t.v6jMH_m6QluQWq58OfpXKgeYe6z3IOXN8O1rgQzRvIxqKZJw7Qv_ljtDz57QnN87NKemaF-dSBUSk6GCPxOzxA",
     "GlobalRankCsvFilePath": "../data/companies_rank.csv"
 }

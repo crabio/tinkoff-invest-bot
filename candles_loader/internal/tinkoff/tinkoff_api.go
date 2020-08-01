@@ -5,19 +5,17 @@ import (
 	"log"
 	"time"
 
-	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/config"
-
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 )
 
 // SandboxRest specify example of using Sandbox API
-func SandboxRest(configuration config.Configuration) {
+func SandboxRest(token string) {
 	// Особенность работы в песочнице состоит в том что перед началом работы надо вызвать метод Register
 	// и выставить установить(нарисовать) себе активов в портфеле методами SetCurrencyBalance (валютные активы) и
 	// SetPositionsBalance (НЕ валютные активы)
 	// Обнулить портфель можно методом Clear
 	// Все остальные методы rest клиента так же доступны в песочнице
-	client := sdk.NewSandboxRestClient(configuration.Token)
+	client := sdk.NewSandboxRestClient(token)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -114,8 +112,8 @@ func SandboxRest(configuration config.Configuration) {
 }
 
 // Rest specify example of Rest API usage
-func Rest(configuration config.Configuration) {
-	client := sdk.NewRestClient(configuration.Token)
+func Rest(token string) {
+	client := sdk.NewRestClient(token)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

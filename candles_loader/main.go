@@ -6,6 +6,7 @@ import (
 
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/config"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/globalrank"
+	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/tinkoff"
 )
 
 // Configuration File Path. Default "config.json"
@@ -21,12 +22,19 @@ func main() {
 	// Parse Config from JSON
 	configuration = config.ReadFromFile(*configurationFilePathPtr)
 
-	globalRanks, err := globalrank.ReadGlobalRankCsv(configuration.GlobalRankCsvFilePath)
+	// Read Global Rank Companies rating
+	_, err := globalrank.ReadGlobalRankCsv(configuration.GlobalRankCsvFilePath)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	log.Println(globalRanks)
+	// Get all Tinkoff Markets
+	tinkoff.GetAllMarketsList(configuration.ProductionToken)
+
+	// // Get Tickets FIGI from Tinkoff
+	// for _, globalRank := range globalRanks {
+	// 	tinkoff.GetFigiByTicket(configuration.ProductionToken, globalRank.Name)
+	// }
 
 	// if configuration.IsSandbox {
 	// 	sandboxRest()
