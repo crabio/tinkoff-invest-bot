@@ -2,4 +2,4 @@
 vendor
 
 # Ignore Binary
-candles_loader
+build/*
