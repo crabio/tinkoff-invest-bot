@@ -8,58 +8,75 @@ import (
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 )
 
-// GetAllMarketsList creates list of all Tinkoff markets
-func GetAllMarketsList(token string) {
+// GetAllMarketsMap creates map of all Tinkoff markets where name is Key
+func GetAllMarketsMap(token string) (instrumentNameMap map[string]sdk.Instrument) {
 	// Create REST Client
 	client := sdk.NewRestClient(token)
+
+	// Init map
+	instrumentNameMap = make(map[string]sdk.Instrument)
 
 	// Create context
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Println("Получение валютных инструментов")
-	// Например: USD000UTSTOM - USD, EUR_RUB__TOM - EUR
-	currencies, err := client.Currencies(ctx)
+	log.Println("Get currency instruments")
+	// Example: USD000UTSTOM - USD, EUR_RUB__TOM - EUR
+	instruments, err := client.Currencies(ctx)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Printf("%+v\n", currencies)
+	// Add markets into map
+	for _, instrument := range instruments {
+		instrumentNameMap[instrument.Name] = instrument
+	}
 
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Println("Получение фондовых инструментов")
-	// Например: FXMM - Казначейские облигации США, FXGD - золото
-	etfs, err := client.ETFs(ctx)
+	log.Println("Fet etf instruments")
+	// Example: FXMM - Казначейские облигации США, FXGD - золото
+	instruments, err = client.ETFs(ctx)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Printf("%+v\n", etfs)
+	// Add markets into map
+	for _, instrument := range instruments {
+		instrumentNameMap[instrument.Name] = instrument
+	}
 
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Println("Получение облигационных инструментов")
-	// Например: SU24019RMFS0 - ОФЗ 24019
-	bonds, err := client.Bonds(ctx)
+	log.Println("Get obligation instruments")
+	// Example: SU24019RMFS0 - ОФЗ 24019
+	instruments, err = client.Bonds(ctx)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Printf("%+v\n", bonds)
+	// Add markets into map
+	for _, instrument := range instruments {
+		instrumentNameMap[instrument.Name] = instrument
+	}
 
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Println("Получение акционных инструментов")
-	// Например: SBUX - Starbucks Corporation
-	stocks, err := client.Stocks(ctx)
+	log.Println("Add stock instruments")
+	// Example: SBUX - Starbucks Corporation
+	instruments, err = client.Stocks(ctx)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Printf("%+v\n", stocks)
+	// Add markets into map
+	for _, instrument := range instruments {
+		instrumentNameMap[instrument.Name] = instrument
+	}
 
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
+	return
 }
 
 // GetFigiByTicket receive FIGI of instruments by ticket

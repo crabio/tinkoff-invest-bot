@@ -29,7 +29,9 @@ func main() {
 	}
 
 	// Get all Tinkoff Markets
-	tinkoff.GetAllMarketsList(configuration.ProductionToken)
+	instrumentsNameMap := tinkoff.GetAllMarketsMap(configuration.ProductionToken)
+
+	log.Println(instrumentsNameMap)
 
 	// // Get Tickets FIGI from Tinkoff
 	// for _, globalRank := range globalRanks {
