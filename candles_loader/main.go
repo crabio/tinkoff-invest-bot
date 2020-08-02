@@ -4,9 +4,11 @@ import (
 	"flag"
 	"log"
 
+	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/config"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/globalrank"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/tinkoff"
+	"github.com/xrash/smetrics"
 )
 
 // Configuration File Path. Default "config.json"
@@ -23,15 +25,37 @@ func main() {
 	configuration = config.ReadFromFile(*configurationFilePathPtr)
 
 	// Read Global Rank Companies rating
-	_, err := globalrank.ReadGlobalRankCsv(configuration.GlobalRankCsvFilePath)
+	globalRanks, err := globalrank.ReadGlobalRankCsv(configuration.GlobalRankCsvFilePath)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	// Get all Tinkoff Markets
-	instrumentsNameMap := tinkoff.GetAllMarketsMap(configuration.ProductionToken)
+	instruments, err := tinkoff.GetAllMarkets(configuration.ProductionToken)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	log.Println(instrumentsNameMap)
+	// Match global rank and Tinkoff instruments
+	counter := 0
+	var globalRankInstruments []sdk.Instrument
+
+	for _, globalRank := range globalRanks {
+		for i, instrument := range instruments {
+			// Match
+			if smetrics.JaroWinkler(globalRank.Name, instrument.Name, 0.7, 4) > 0.9 {
+				counter++
+				// Add to globalRankInstruments
+				globalRankInstruments = append(globalRankInstruments, instrument)
+
+				// Remove matched element at index i from instruments.
+				instruments[i] = instruments[len(instruments)-1] // Copy last element to index i.
+				instruments = instruments[:len(instruments)-1]   // Truncate slice.
+			}
+		}
+	}
+	log.Println(globalRankInstruments)
+	log.Printf("Founded %d/%d", counter, len(globalRanks))
 
 	// // Get Tickets FIGI from Tinkoff
 	// for _, globalRank := range globalRanks {

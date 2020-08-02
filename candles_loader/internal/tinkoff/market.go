@@ -8,13 +8,10 @@ import (
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 )
 
-// GetAllMarketsMap creates map of all Tinkoff markets where name is Key
-func GetAllMarketsMap(token string) (instrumentNameMap map[string]sdk.Instrument) {
+// GetAllMarkets creates list of all Tinkoff markets
+func GetAllMarkets(token string) (instruments []sdk.Instrument, err error) {
 	// Create REST Client
 	client := sdk.NewRestClient(token)
-
-	// Init map
-	instrumentNameMap = make(map[string]sdk.Instrument)
 
 	// Create context
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -22,56 +19,48 @@ func GetAllMarketsMap(token string) (instrumentNameMap map[string]sdk.Instrument
 
 	log.Println("Get currency instruments")
 	// Example: USD000UTSTOM - USD, EUR_RUB__TOM - EUR
-	instruments, err := client.Currencies(ctx)
+	currencies, err := client.Currencies(ctx)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
-	// Add markets into map
-	for _, instrument := range instruments {
-		instrumentNameMap[instrument.Name] = instrument
-	}
+	// Add currencies
+	instruments = append(instruments, currencies...)
 
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	log.Println("Fet etf instruments")
 	// Example: FXMM - Казначейские облигации США, FXGD - золото
-	instruments, err = client.ETFs(ctx)
+	etfs, err := client.ETFs(ctx)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
-	// Add markets into map
-	for _, instrument := range instruments {
-		instrumentNameMap[instrument.Name] = instrument
-	}
+	// Add etfs
+	instruments = append(instruments, etfs...)
 
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Println("Get obligation instruments")
+	log.Println("Get bond instruments")
 	// Example: SU24019RMFS0 - ОФЗ 24019
-	instruments, err = client.Bonds(ctx)
+	bonds, err := client.Bonds(ctx)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
-	// Add markets into map
-	for _, instrument := range instruments {
-		instrumentNameMap[instrument.Name] = instrument
-	}
+	// Add bonds
+	instruments = append(instruments, bonds...)
 
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	log.Println("Add stock instruments")
 	// Example: SBUX - Starbucks Corporation
-	instruments, err = client.Stocks(ctx)
+	stocks, err := client.Stocks(ctx)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
-	// Add markets into map
-	for _, instrument := range instruments {
-		instrumentNameMap[instrument.Name] = instrument
-	}
+	// Add stocks
+	instruments = append(instruments, stocks...)
 
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
