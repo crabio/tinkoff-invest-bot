@@ -1,0 +1,6 @@
+[submodule "docker/dockprom"]
+	path = docker/dockprom
+	url = https://github.com/stefanprodan/dockprom.git
+[submodule "docker/incubator-superset"]
+	path = docker/incubator-superset
+	url = https://github.com/apache/incubator-superset.git
