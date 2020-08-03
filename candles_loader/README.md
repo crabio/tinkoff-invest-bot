@@ -9,3 +9,7 @@ Programm for loading historical candles from Tinkoff API.
 ## Development
 
 For building use: `bash scripts/build.sh`
+
+### Formatting
+
+We are using `gofmt -w yourcode.go` for code formatting.

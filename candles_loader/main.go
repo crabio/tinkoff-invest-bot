@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"sync"
+	"time"
 
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/config"
@@ -31,6 +32,35 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	// Match global rank and Tinkoff instruments
+	globalRankInstuments := MatchGlobalRankOnstruments(globalRanks)
+
+	log.Println(globalRankInstuments)
+
+	// Get candles for all instruments
+	for _, instrument := range globalRankInstuments {
+		// Get candles
+		tinkoff.GetCandlesPerDay(configuration.ProductionToken,
+			instrument,
+			sdk.CandleInterval15Min,
+			time.Date(2020, 2, 4, 0, 0, 0, 0, time.UTC),
+			5)
+	}
+
+	// // Get Tickets FIGI from Tinkoff
+	// for _, globalRank := range globalRanks {
+	// 	tinkoff.GetFigiByTicket(configuration.ProductionToken, globalRank.Name)
+	// }
+
+	// if configuration.IsSandbox {
+	// 	sandboxRest()
+	// } else {
+	// 	rest()
+	// }
+}
+
+// MatchGlobalRankOnstruments match list of Global Rank and Tinkoff Instruments
+func MatchGlobalRankOnstruments(globalRanks []globalrank.GlobalRank) (instruments []sdk.Instrument) {
 	// Get all Tinkoff Markets
 	instruments, err := tinkoff.GetAllMarkets(configuration.ProductionToken)
 	if err != nil {
@@ -61,17 +91,6 @@ func main() {
 		}(globalRank)
 	}
 	wg.Wait()
-	log.Println(globalRankInstruments)
-	log.Printf("Founded %d/%d", counter, len(globalRanks))
-
-	// // Get Tickets FIGI from Tinkoff
-	// for _, globalRank := range globalRanks {
-	// 	tinkoff.GetFigiByTicket(configuration.ProductionToken, globalRank.Name)
-	// }
-
-	// if configuration.IsSandbox {
-	// 	sandboxRest()
-	// } else {
-	// 	rest()
-	// }
+	log.Printf("Founded %d/%d Tinkoff Instruments in GLobal Rank", counter, len(globalRanks))
+	return
 }

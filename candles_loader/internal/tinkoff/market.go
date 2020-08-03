@@ -62,31 +62,41 @@ func GetAllMarkets(token string) (instruments []sdk.Instrument, err error) {
 	// Add stocks
 	instruments = append(instruments, stocks...)
 
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	return
 }
 
-// GetFigiByTicket receive FIGI of instruments by ticket
-func GetFigiByTicket(token string, ticket string) {
+// GetCandlesPerDay receives candles per day with custom inverval for Tinkoff instrument
+func GetCandlesPerDay(
+	token string, instrument sdk.Instrument,
+	interval sdk.CandleInterval,
+	date time.Time,
+	maxAttempts int) {
 	// Create REST Client
 	client := sdk.NewRestClient(token)
 
-	// Create context
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	// Until not success ot attemps out of range
+	success := false
+	attempt := 0
+	for !success {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 
-	// Получение инструмента по тикеру, возвращает массив инструментов потому что тикер уникален только в рамках одной биржи
-	// но может совпадать на разных биржах у разных кампаний
-	// Например: https://www.moex.com/ru/issue.aspx?code=FIVE и https://www.nasdaq.com/market-activity/stocks/FIVE
-	// В этом примере получить нужную компанию можно проверив поле Currency
-	instruments, _ := client.InstrumentByTicker(ctx, ticket)
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-	log.Printf("Instrument for tiket '%s': %+v\n", ticket, instruments)
-
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+		// Get candles for specific day
+		candles, err := client.Candles(ctx, date, date.AddDate(0, 0, 1), interval, instrument.FIGI)
+		if err != nil {
+			// Check attempts counter
+			if attempt == maxAttempts {
+				log.Fatalln("maxAttempts count reached")
+			}
+			// New attempt
+			log.Println("Request Error: ", err)
+			log.Println("Error with requests limit. Sleep for 1 second")
+			time.Sleep(1 * time.Second)
+			attempt++
+		} else {
+			// Success request
+			success = true
+			log.Printf("%+v\n", candles)
+		}
+	}
 }
