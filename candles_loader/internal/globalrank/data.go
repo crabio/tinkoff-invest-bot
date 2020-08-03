@@ -1,4 +1,4 @@
-package data
+package globalrank
 
 // GlobalRank - information about company rank in global Forbes rating
 type GlobalRank struct {

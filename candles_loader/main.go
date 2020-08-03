@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"sync"
 
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/config"
@@ -39,21 +40,27 @@ func main() {
 	// Match global rank and Tinkoff instruments
 	counter := 0
 	var globalRankInstruments []sdk.Instrument
+	var wg sync.WaitGroup
 
 	for _, globalRank := range globalRanks {
-		for i, instrument := range instruments {
-			// Match
-			if smetrics.JaroWinkler(globalRank.Name, instrument.Name, 0.7, 4) > 0.9 {
-				counter++
-				// Add to globalRankInstruments
-				globalRankInstruments = append(globalRankInstruments, instrument)
+		// These goroutines share memory, but only for reading.
+		wg.Add(1)
 
-				// Remove matched element at index i from instruments.
-				instruments[i] = instruments[len(instruments)-1] // Copy last element to index i.
-				instruments = instruments[:len(instruments)-1]   // Truncate slice.
+		go func(globalRank globalrank.GlobalRank) {
+
+			for _, instrument := range instruments {
+				// Match
+				if smetrics.JaroWinkler(globalRank.Name, instrument.Name, 0.7, 4) > 0.9 {
+					counter++
+					// Add to globalRankInstruments
+					globalRankInstruments = append(globalRankInstruments, instrument)
+				}
 			}
-		}
+
+			wg.Done()
+		}(globalRank)
 	}
+	wg.Wait()
 	log.Println(globalRankInstruments)
 	log.Printf("Founded %d/%d", counter, len(globalRanks))
 

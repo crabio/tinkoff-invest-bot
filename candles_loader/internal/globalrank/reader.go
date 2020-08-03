@@ -4,11 +4,10 @@ import (
 	"os"
 
 	"github.com/gocarina/gocsv"
-	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/data"
 )
 
 // ReadGlobalRankCsv reads global rank  data from CSV file
-func ReadGlobalRankCsv(filePath string) (globalRanks []data.GlobalRank, err error) {
+func ReadGlobalRankCsv(filePath string) (globalRanks []GlobalRank, err error) {
 	// Open file
 	in, err := os.Open(filePath)
 	if err != nil {
