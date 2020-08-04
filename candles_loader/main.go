@@ -47,10 +47,7 @@ func main() {
 			5)
 	}
 
-	// // Get Tickets FIGI from Tinkoff
-	// for _, globalRank := range globalRanks {
-	// 	tinkoff.GetFigiByTicket(configuration.ProductionToken, globalRank.Name)
-	// }
+	// Load into DB
 
 	// if configuration.IsSandbox {
 	// 	sandboxRest()
