@@ -66,11 +66,11 @@ func main() {
 	daySequence := date.GenerateDaySequence(lattestTimestamp, time.Now())
 
 	// Itterate over all days in sequence
-	for _, date := range daySequence {
-		// Log date
-		log.Println("Load data for: ", date)
+	for dateX, date := range daySequence {
+		log.Printf("Load data for date %d/%d: %v", dateX, len(daySequence), date)
 		// Get candles for all instruments for one day
-		for _, instrument := range globalRankInstuments {
+		for instrumentX, instrument := range globalRankInstuments {
+			log.Printf("Load data for instrument %d/%d: '%v'", instrumentX, len(globalRankInstuments), instrument.Name)
 			// Get candles
 			candles := tinkoff.GetCandlesPerDay(configuration.ProductionToken,
 				instrument,
@@ -95,7 +95,7 @@ func main() {
 }
 
 // MatchGlobalRankOnstruments match list of Global Rank and Tinkoff Instruments
-func MatchGlobalRankOnstruments(globalRanks []globalrank.GlobalRank) (instruments []sdk.Instrument) {
+func MatchGlobalRankOnstruments(globalRanks []globalrank.GlobalRank) (globalRankInstruments []sdk.Instrument) {
 	// Get all Tinkoff Markets
 	instruments, err := tinkoff.GetAllMarkets(configuration.ProductionToken)
 	if err != nil {
@@ -104,7 +104,6 @@ func MatchGlobalRankOnstruments(globalRanks []globalrank.GlobalRank) (instrument
 
 	// Match global rank and Tinkoff instruments
 	counter := 0
-	var globalRankInstruments []sdk.Instrument
 	var wg sync.WaitGroup
 
 	for _, globalRank := range globalRanks {
