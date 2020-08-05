@@ -61,6 +61,11 @@ func main() {
 		log.Println("Lattest timestamp in candles wasn't found")
 		lattestTimestamp = configuration.StartLoadDate
 	}
+	// Get start of the day
+	lattestTimestamp = date.Bod(lattestTimestamp)
+
+	// Delete first day data
+	db.DeleteCandlesFromDay(dbConfiguration, lattestTimestamp)
 
 	// Generate date sequence
 	daySequence := date.GenerateDaySequence(lattestTimestamp, time.Now())

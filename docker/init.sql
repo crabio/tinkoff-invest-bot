@@ -11,14 +11,14 @@ CREATE TABLE IF NOT EXISTS instrument (
     ticker VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     min_price_increment FLOAT NOT NULL,
-    currency VARCHAR(10) NOT NULL,
-    type VARCHAR(50) NOT NULL
+    currency VARCHAR(255) NOT NULL,
+    type VARCHAR(255) NOT NULL
 );
 
 -- Candles Interval meta
 CREATE TABLE IF NOT EXISTS candle_interval (
     id SMALLINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(10) NOT NULL UNIQUE
+    name VARCHAR(255) NOT NULL UNIQUE
 );
 
 -- Candles Data
