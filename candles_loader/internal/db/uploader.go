@@ -15,7 +15,7 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 		config.DbType, config.User, config.Password, config.Hosname, config.Port, config.DbName)
 
 	// Connect to DB
-	db, err := sql.Open("db", connectionString)
+	db, err := sql.Open(config.DbType, connectionString)
 	// Check err
 	if err != nil {
 		return err
@@ -24,6 +24,7 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 	defer db.Close()
 
 	// Create Temp table
+	log.Println("Create temp table for instruments")
 	queryStr := `CREATE TEMPORARY TABLE temp_instrument(
 		id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 		figi VARCHAR(255) NOT NULL,
@@ -90,15 +91,16 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 	}
 
 	// Copy only new rows from temp table into production
+	log.Println("Copy instruments data from temp table into prod")
 	queryStr = `
-	INSERT INTO $1 (figi, ticker, name, min_price_increment, currency, type)
+	INSERT INTO instrument (figi, ticker, name, min_price_increment, currency, type)
 	SELECT temp.figi, temp.ticker, temp.name, temp.min_price_increment, temp.currency, temp.type
 	FROM temp_instrument as temp
-	LEFT JOIN $1 as instrument
+	LEFT JOIN instrument as instrument
 	ON temp.figi = instrument.figi
 	WHERE instrument.id IS NULL;`
 	// Execute query
-	_, err = db.Exec(queryStr, config.InstrumentsTableName)
+	_, err = db.Exec(queryStr)
 	// Check err
 	if err != nil {
 		return err
@@ -123,6 +125,7 @@ func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error)
 	defer db.Close()
 
 	// Create Temp table
+	log.Println("Create temp table for candles")
 	queryStr := `CREATE TEMPORARY TABLE temp_candle(
 		ts timestamptz NOT NULL,
 		instrument_figi VARCHAR(10) NOT NULL,
@@ -193,6 +196,7 @@ func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error)
 	}
 
 	// Add new candles intervals if found
+	log.Println("Add new candles intervals")
 	queryStr = `
 	INSERT INTO $1 (name)
 	SELECT temp.interval_name
@@ -208,6 +212,7 @@ func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error)
 	}
 
 	// Get unknown Instruments
+	log.Println("Get unknown instruments list")
 	queryStr = `
 	SELECT temp.interval_name
 	FROM temp_candle as temp
@@ -246,7 +251,8 @@ func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error)
 		return err
 	}
 
-	// Copy new candles from temp table into production
+	// Copy candles from temp table into production
+	log.Println("Copy candles from temp table into prod")
 	queryStr = `
 	INSERT INTO $1 (ts, instrument_id, interval_id,
 		open_price, close_price, high_price, low_price, volume)
