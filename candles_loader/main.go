@@ -9,6 +9,7 @@ import (
 
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/config"
+	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/date"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/globalrank"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/tinkoff"
 	"github.com/xrash/smetrics"
@@ -22,15 +23,12 @@ var configuration = config.Configuration{}
 
 // Database configuration
 var dbConfiguration = db.Configuration{
-	DbType:                   "postgres",
-	User:                     "postgres",
-	Password:                 "postgres",
-	Hosname:                  "localhost",
-	Port:                     5432,
-	DbName:                   "tinkoff",
-	InstrumentsTableName:     "instrument",
-	CandleIntervalsTableName: "candle_interval",
-	CandlesTableName:         "candle"}
+	DbType:   "postgres",
+	User:     "postgres",
+	Password: "postgres",
+	Hosname:  "localhost",
+	Port:     5432,
+	DbName:   "tinkoff"}
 
 func main() {
 	// Parse Arguments
@@ -56,14 +54,37 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	// Get candles for all instruments
-	for _, instrument := range globalRankInstuments {
-		// Get candles
-		tinkoff.GetCandlesPerDay(configuration.ProductionToken,
-			instrument,
-			sdk.CandleInterval15Min,
-			time.Date(2020, 2, 4, 0, 0, 0, 0, time.UTC),
-			5)
+	// Get latest candle date in DB
+	lattestTimestamp, err := db.GetLattestCandleTimestamp(dbConfiguration, configuration.StartLoadDate)
+	// Check error
+	if err != nil {
+		log.Println("Lattest timestamp in candles wasn't found")
+		lattestTimestamp = configuration.StartLoadDate
+	}
+
+	// Generate date sequence
+	daySequence := date.GenerateDaySequence(lattestTimestamp, time.Now())
+
+	// Itterate over all days in sequence
+	for _, date := range daySequence {
+		// Log date
+		log.Println("Load data for: ", date)
+		// Get candles for all instruments for one day
+		for _, instrument := range globalRankInstuments {
+			// Get candles
+			candles := tinkoff.GetCandlesPerDay(configuration.ProductionToken,
+				instrument,
+				sdk.CandleInterval15Min,
+				date,
+				5)
+
+			// Load candles into DB
+			err = db.UploadCandlesIntoDB(dbConfiguration, candles)
+			// Check error
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}
 	}
 
 	// if configuration.IsSandbox {

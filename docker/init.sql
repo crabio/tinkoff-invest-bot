@@ -18,14 +18,14 @@ CREATE TABLE IF NOT EXISTS instrument (
 -- Candles Interval meta
 CREATE TABLE IF NOT EXISTS candle_interval (
     id SMALLINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(10) NOT NULL UNIQUE,
-)
+    name VARCHAR(10) NOT NULL UNIQUE
+);
 
 -- Candles Data
 CREATE TABLE IF NOT EXISTS candle (
     ts timestamptz NOT NULL,
     instrument_id INTEGER REFERENCES instrument (id) NOT NULL,
-    interval_id SMALLINT REFERENCES interval (id) NOT NULL,
+    interval_id SMALLINT REFERENCES candle_interval (id) NOT NULL,
     open_price REAL NULL,
     close_price REAL NULL,
     high_price REAL NULL,
