@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS instrument (
 -- Candles Interval meta
 CREATE TABLE IF NOT EXISTS candle_interval (
     id SMALLINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(10) NOT NULL,
+    name VARCHAR(10) NOT NULL UNIQUE,
 )
 
 -- Candles Data
