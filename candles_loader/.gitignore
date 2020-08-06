@@ -3,3 +3,6 @@ vendor
 
 # Ignore Binary
 build/*
+
+# Ingore env files
+.env
