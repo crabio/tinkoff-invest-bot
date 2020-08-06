@@ -48,7 +48,24 @@ Application has ENV flags for configuring all required config fields:
 * DB_PORT 5432
 * DB_NAME "tinkoff"
 
-For running use: `docker run -v /data/tinkoff-invest-bot/data/:/data -e PRODUCTION_TOKEN="<your token>" candles-loader`
+It usefull to create `.env` like:
+
+```env
+SANDBOX_TOKEN=<your token>
+PRODUCTION_TOKEN=<your token>
+GLOBAL_RANK_CSV_FILE_PATH=/data/companies_rank.csv
+START_LOAD_DATE=2020-01-01T00:00:00.000Z
+MAX_ATTEMPTS=10
+# DB args
+DB_TYPE=postgres
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_HOSTNAME=timescaledb
+DB_PORT=5432
+DB_NAME=tinkoff
+```
+
+For running use: `docker run -v /tinkoff-invest-bot/data/:/data --env-file .env candles-loader`
 
 ### Formatting
 
