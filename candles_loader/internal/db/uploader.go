@@ -12,10 +12,10 @@ import (
 func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrument) (err error) {
 	// Create onnection string
 	connectionString := fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=disable",
-		config.DbType, config.User, config.Password, config.Hosname, config.Port, config.DbName)
+		config.Type, config.User, config.Password, config.Hosname, config.Port, config.DbName)
 
 	// Connect to DB
-	db, err := sql.Open(config.DbType, connectionString)
+	db, err := sql.Open(config.Type, connectionString)
 	// Check err
 	if err != nil {
 		return err
@@ -113,10 +113,10 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error) {
 	// Create onnection string
 	connectionString := fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=disable",
-		config.DbType, config.User, config.Password, config.Hosname, config.Port, config.DbName)
+		config.Type, config.User, config.Password, config.Hosname, config.Port, config.DbName)
 
 	// Connect to DB
-	db, err := sql.Open(config.DbType, connectionString)
+	db, err := sql.Open(config.Type, connectionString)
 	// Check err
 	if err != nil {
 		return err

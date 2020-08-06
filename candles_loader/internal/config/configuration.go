@@ -11,4 +11,11 @@ type Configuration struct {
 	GlobalRankCsvFilePath string
 	StartLoadDate         time.Time
 	MaxAttempts           uint
+	// DB Configuration
+	DbType     string // Data Base type, for example "postgres"
+	DbUser     string
+	DbPassword string
+	DbHosname  string
+	DbPort     uint
+	DbName     string
 }

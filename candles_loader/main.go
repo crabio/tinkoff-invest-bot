@@ -21,21 +21,28 @@ var configurationFilePathPtr = flag.String("c", "config.json", "Configuration Fi
 // Configuration Structure
 var configuration = config.Configuration{}
 
-// Database configuration
-var dbConfiguration = db.Configuration{
-	DbType:   "postgres",
-	User:     "postgres",
-	Password: "postgres",
-	Hosname:  "localhost",
-	Port:     5432,
-	DbName:   "tinkoff"}
-
 func main() {
 	// Parse Arguments
 	flag.Parse()
 
 	// Parse Config from JSON
-	configuration = config.ReadFromFile(*configurationFilePathPtr)
+	configuration, err := config.ReadFromFile(*configurationFilePathPtr)
+	// Check error
+	if err != nil {
+		log.Println(err)
+	}
+
+	// Extend config with ENV parameters
+	configuration = config.ExtendWithEnvFlags(configuration)
+
+	// Create database configuration
+	dbConfiguration := db.Configuration{
+		Type:     configuration.DbType,
+		User:     configuration.DbUser,
+		Password: configuration.DbPassword,
+		Hosname:  configuration.DbHosname,
+		Port:     configuration.DbPort,
+		DbName:   configuration.DbName}
 
 	// Read Global Rank Companies rating
 	globalRanks, err := globalrank.ReadGlobalRankCsv(configuration.GlobalRankCsvFilePath)
