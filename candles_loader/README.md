@@ -14,7 +14,8 @@ Config file example:
     "SandboxToken": "<YOUR TOKEN>",
     "ProductionToken": "YOUR TOKEN",
     "GlobalRankCsvFilePath": "../data/companies_rank.csv",
-    "StartLoadDate": "2012-04-23T18:25:43.511Z"
+    "StartLoadDate": "2012-04-23T18:25:43.511Z",
+    "MaxAttempts": 10
 }
 ```
 
