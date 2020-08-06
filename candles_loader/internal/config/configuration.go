@@ -10,4 +10,5 @@ type Configuration struct {
 	ProductionToken       string
 	GlobalRankCsvFilePath string
 	StartLoadDate         time.Time
+	MaxAttempts           uint
 }

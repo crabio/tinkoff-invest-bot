@@ -70,14 +70,14 @@ func GetCandlesPerDay(
 	token string, instrument sdk.Instrument,
 	interval sdk.CandleInterval,
 	date time.Time,
-	maxAttempts int) (
+	maxAttempts uint) (
 	candles []sdk.Candle) {
 	// Create REST Client
 	client := sdk.NewRestClient(token)
 
 	// Until not success ot attemps out of range
-	success := false
-	attempt := 0
+	var success bool = false
+	var attempt uint = 0
 	for !success {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()

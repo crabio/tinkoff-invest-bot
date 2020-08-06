@@ -81,7 +81,7 @@ func main() {
 				instrument,
 				sdk.CandleInterval15Min,
 				date,
-				5)
+				configuration.MaxAttempts)
 
 			// Load candles into DB
 			err = db.UploadCandlesIntoDB(dbConfiguration, candles)
