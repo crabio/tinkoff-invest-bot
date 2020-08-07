@@ -54,9 +54,8 @@ services:
       context: ../candles_loader
     container_name: candles_loader
     restart: unless-stopped
+    # env_file: ../candles_loader/.env
     environment:
-      - SANDBOX_TOKEN=
-      - PRODUCTION_TOKEN=
       - GLOBAL_RANK_CSV_FILE_PATH=/data/companies_rank.csv
       - START_LOAD_DATE=2020-01-01T00:00:00.000Z
       - MAX_ATTEMPTS=10
