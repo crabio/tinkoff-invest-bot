@@ -65,7 +65,7 @@ DB_PORT=5432
 DB_NAME=tinkoff
 ```
 
-For running use: `docker run -v /tinkoff-invest-bot/data/:/data --env-file .env --network bridge --name candles-loader -d candles-loader`
+For running use: `docker run -v /tinkoff-invest-bot/data/:/data --env-file .env --name candles-loader -d candles-loader`
 
 ### Formatting
 

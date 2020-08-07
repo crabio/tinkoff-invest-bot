@@ -14,7 +14,17 @@ ENV DB_HOSTNAME "timescaledb"
 ENV DB_PORT 5432
 ENV DB_NAME "tinkoff"
 
-# Add binary file
-ADD build/main /
+# Create app folder
+RUN mkdir /app 
 
-CMD ["/main"]
+# Add sources
+ADD . /app/ 
+
+# Change dir
+WORKDIR /app
+
+# Build binary
+RUN GOOS=linux CGO_ENABLED=0 go build -o main . 
+
+# Run main app
+CMD ["/app/main"]
