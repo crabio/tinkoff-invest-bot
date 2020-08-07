@@ -25,8 +25,10 @@ func main() {
 	// Parse Arguments
 	flag.Parse()
 
+	// Init error var
+	var err error
 	// Parse Config from JSON
-	configuration, err := config.ReadFromFile(*configurationFilePathPtr)
+	configuration, err = config.ReadFromFile(*configurationFilePathPtr)
 	// Check error
 	if err != nil {
 		log.Println(err)

@@ -60,12 +60,12 @@ MAX_ATTEMPTS=10
 DB_TYPE=postgres
 DB_USER=postgres
 DB_PASSWORD=postgres
-DB_HOSTNAME=timescaledb
+DB_HOSTNAME=host.docker.internal
 DB_PORT=5432
 DB_NAME=tinkoff
 ```
 
-For running use: `docker run -v /tinkoff-invest-bot/data/:/data --env-file .env candles-loader`
+For running use: `docker run -v /tinkoff-invest-bot/data/:/data --env-file .env --network bridge --name candles-loader -d candles-loader`
 
 ### Formatting
 
