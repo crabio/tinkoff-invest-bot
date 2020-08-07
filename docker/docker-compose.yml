@@ -50,11 +50,22 @@ services:
       - 1000:8080
 
   candles-loader:
-    env_file: ../candles_loader/.env
     build: 
       context: ../candles_loader
     container_name: candles_loader
     restart: unless-stopped
+    environment:
+      - SANDBOX_TOKEN=
+      - PRODUCTION_TOKEN=
+      - GLOBAL_RANK_CSV_FILE_PATH=/data/companies_rank.csv
+      - START_LOAD_DATE=2020-01-01T00:00:00.000Z
+      - MAX_ATTEMPTS=10
+      - DB_TYPE=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOSTNAME=host.docker.internal
+      - DB_PORT=5432
+      - DB_NAME=tinkoff
     volumes:
       - ./../data/:/data
 
