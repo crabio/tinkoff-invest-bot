@@ -23,10 +23,10 @@ jobs:
         id: go
 
       - name: Build
-        run: go build -v .
+        run: go build -v
       
       - name: Build for Linux
-        run: GOOS=linux CGO_ENABLED=0 go build -v . 
+        run: GOOS=linux CGO_ENABLED=0 go build -v
 
       - name: Test
         run: go test -v -coverpkg=./... -coverprofile=profile.cov ./...
