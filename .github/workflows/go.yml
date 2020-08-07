@@ -12,7 +12,9 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     defaults:
-      working-directory: candles_loader
+      run:
+        shell: bash
+        working-directory: candles_loader
     steps:
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
