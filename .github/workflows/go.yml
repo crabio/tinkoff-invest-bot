@@ -16,18 +16,17 @@ jobs:
           shell: bash
           working-directory: candles_loader
     steps:
+        - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+            go-version: ^1.13
+        id: go
 
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.13
-      id: go
+        - name: Build
+        run: go build -v .
+        
+        - name: Build for Linux
+        run: GOOS=linux CGO_ENABLED=0 go build -v . 
 
-    - name: Build
-      run: go build -v .
-      
-    - name: Build for Linux
-      run: GOOS=linux CGO_ENABLED=0 go build -v . 
-
-    - name: Test
-      run: go test -v .
+        - name: Test
+        run: go test -v .
