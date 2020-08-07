@@ -6,3 +6,6 @@ build/*
 
 # Ingore env files
 .env
+
+# Ignore test coverage profile
+profile.cov
