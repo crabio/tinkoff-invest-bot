@@ -86,11 +86,18 @@ func main() {
 		for instrumentX, instrument := range globalRankInstuments {
 			log.Printf("Load data for instrument %d/%d: '%v'", instrumentX, len(globalRankInstuments), instrument.Name)
 			// Get candles
-			candles := tinkoff.GetCandlesPerDay(configuration.ProductionToken,
+			candles, err := tinkoff.GetCandlesPerDay(configuration.ProductionToken,
 				instrument,
 				sdk.CandleInterval15Min,
 				date,
 				configuration.MaxAttempts)
+			// Check error
+			if err != nil {
+				log.Println("Maybe problem with production token: ",
+					configuration.ProductionToken,
+					" or Internet onnection.")
+				log.Fatalln(err)
+			}
 
 			// Load candles into DB
 			err = db.UploadCandlesIntoDB(dbConfiguration, candles)
@@ -100,12 +107,6 @@ func main() {
 			}
 		}
 	}
-
-	// if configuration.IsSandbox {
-	// 	sandboxRest()
-	// } else {
-	// 	rest()
-	// }
 }
 
 // MatchGlobalRankOnstruments match list of Global Rank and Tinkoff Instruments
@@ -113,6 +114,9 @@ func MatchGlobalRankOnstruments(globalRanks []globalrank.GlobalRank) (globalRank
 	// Get all Tinkoff Markets
 	instruments, err := tinkoff.GetAllMarkets(configuration.ProductionToken)
 	if err != nil {
+		log.Println("Maybe problem with production token: ",
+			configuration.ProductionToken,
+			" or Internet onnection.")
 		log.Fatalln(err)
 	}
 

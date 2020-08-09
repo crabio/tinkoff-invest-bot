@@ -71,7 +71,8 @@ func GetCandlesPerDay(
 	interval sdk.CandleInterval,
 	date time.Time,
 	maxAttempts uint) (
-	candles []sdk.Candle) {
+	candles []sdk.Candle,
+	err error) {
 	// Create REST Client
 	client := sdk.NewRestClient(token)
 
@@ -83,12 +84,12 @@ func GetCandlesPerDay(
 		defer cancel()
 
 		// Get candles for specific day
-		var err error
 		candles, err = client.Candles(ctx, date, date.AddDate(0, 0, 1), interval, instrument.FIGI)
 		if err != nil {
 			// Check attempts counter
 			if attempt == maxAttempts {
 				log.Fatalln("maxAttempts count reached")
+				return nil, err
 			}
 			// New attempt
 			time.Sleep(1 * time.Second)
