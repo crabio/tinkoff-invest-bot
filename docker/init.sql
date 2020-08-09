@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS instrument (
     name VARCHAR(255) NOT NULL,
     min_price_increment FLOAT NOT NULL,
     currency VARCHAR(255) NOT NULL,
-    type VARCHAR(255) NOT NULL
+    type VARCHAR(255) NOT NULL,
+    global_rank BOOLEAN NOT NULL -- Is included intoForbes global rank
 );
 
 -- Candles Interval meta
