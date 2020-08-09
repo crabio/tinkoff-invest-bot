@@ -7,7 +7,7 @@ Programm for loading historical candles from Tinkoff API.
 * main.go - Main Golang source file
 * go.mod, go.sum - Golang dependenccies files
 * Dockerfile - fFFIle for dockerize application
-* build - Folder for storing builded binaries
+* build - Folder for storing built binaries
 * internal - Private sources/libraries
 
 ## Presequencies
