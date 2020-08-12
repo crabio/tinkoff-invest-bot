@@ -32,7 +32,8 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 		name VARCHAR(255) NOT NULL,
 		min_price_increment FLOAT NOT NULL,
 		currency VARCHAR(255) NOT NULL,
-		type VARCHAR(255) NOT NULL
+		type VARCHAR(255) NOT NULL,
+		global_rank BOOL NOT NULL
 	);`
 	// Execute query
 	_, err = db.Exec(queryStr)
@@ -50,7 +51,7 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 
 	// Prepare copy query into temp table
 	stmt, err := txn.Prepare(pq.CopyIn(
-		"temp_instrument", "figi", "ticker", "name", "min_price_increment", "currency", "type"))
+		"temp_instrument", "figi", "ticker", "name", "min_price_increment", "currency", "type", "global_rank"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,7 +64,8 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 			instrument.Name,
 			instrument.MinPriceIncrement,
 			instrument.Currency,
-			instrument.Type)
+			instrument.Type,
+			true)
 		// Check error
 		if err != nil {
 			return err
@@ -93,8 +95,8 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 	// Copy only new rows from temp table into production
 	log.Println("Copy instruments data from temp table into prod")
 	queryStr = `
-	INSERT INTO instrument (figi, ticker, name, min_price_increment, currency, type)
-	SELECT temp.figi, temp.ticker, temp.name, temp.min_price_increment, temp.currency, temp.type
+	INSERT INTO instrument (figi, ticker, name, min_price_increment, currency, type, global_rank)
+	SELECT temp.figi, temp.ticker, temp.name, temp.min_price_increment, temp.currency, temp.type, temp.global_rank
 	FROM temp_instrument as temp
 	LEFT JOIN instrument as instrument
 	ON temp.figi = instrument.figi
