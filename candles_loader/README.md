@@ -25,6 +25,7 @@ Config file example:
     "GlobalRankCsvFilePath": "../data/companies_rank.csv",
     "StartLoadDate": "2020-01-02T00:00:00.000Z",
     "MaxAttempts": 10,
+    "CandleInterval": "15min",
     "DbType": "postgres",
     "DbUser": "postgres",
     "DbPassword": "postgres",
@@ -49,6 +50,7 @@ Application has ENV flags for configuring all required config fields:
 * GLOBAL_RANK_CSV_FILE_PATH "/data/companies_rank.csv"
 * START_LOAD_DATE "2020-01-01T00:00:00.000Z"
 * MAX_ATTEMPTS 10
+* CANDLE_INTERVAL "15min" - Allowed candles interval are: "1min","2min","3min","5min","10min","15min","30min","hour","2hour","4hour","day","week","month"
 * DB_TYPE "postgres"
 * DB_USER "postgres"
 * DB_PASSWORD "postgres"
@@ -64,6 +66,7 @@ PRODUCTION_TOKEN=<your token>
 GLOBAL_RANK_CSV_FILE_PATH=/data/companies_rank.csv
 START_LOAD_DATE=2020-01-01T00:00:00.000Z
 MAX_ATTEMPTS=10
+CANDLE_INTERVAL=15min
 # DB args
 DB_TYPE=postgres
 DB_USER=postgres

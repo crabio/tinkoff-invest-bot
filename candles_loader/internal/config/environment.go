@@ -64,6 +64,14 @@ func ExtendWithEnvFlags(oldConfiguration Configuration) (newConfiguration Config
 		}
 	}
 
+	// Read CANDLE_INTERVAL flag
+	envCandleInterval := os.Getenv("CANDLE_INTERVAL")
+	// Check exists
+	if envCandleInterval != "" {
+		log.Println("From ENV DbType = ", envCandleInterval)
+		newConfiguration.CandleInterval = envCandleInterval
+	}
+
 	// Read DB_TYPE flag
 	envDbType := os.Getenv("DB_TYPE")
 	// Check exists

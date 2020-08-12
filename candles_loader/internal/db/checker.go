@@ -24,10 +24,7 @@ func GetLattestCandleTimestamp(config Configuration, startDate time.Time) (latte
 
 	// Get unknown Instruments
 	log.Println("Get unknown instruments list")
-	queryStr := `
-	SELECT MAX(ts)
-	FROM candle as candle
-	WHERE ts > $1;`
+	queryStr := `SELECT MAX(ts) FROM candle WHERE ts < $1;`
 
 	// Execute query
 	row := db.QueryRow(queryStr, startDate)

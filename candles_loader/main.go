@@ -88,7 +88,7 @@ func main() {
 			// Get candles
 			candles, err := tinkoff.GetCandlesPerDay(configuration.ProductionToken,
 				instrument,
-				sdk.CandleInterval15Min,
+				sdk.CandleInterval(configuration.CandleInterval),
 				date,
 				configuration.MaxAttempts)
 			// Check error
