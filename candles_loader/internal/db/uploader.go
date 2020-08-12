@@ -127,7 +127,6 @@ func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error)
 	defer db.Close()
 
 	// Create Temp table
-	log.Println("Create temp table for candles")
 	queryStr := `CREATE TEMPORARY TABLE temp_candle(
 		ts timestamptz NOT NULL,
 		instrument_figi VARCHAR(255) NOT NULL,
@@ -198,7 +197,6 @@ func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error)
 	}
 
 	// Add new candles intervals if found
-	log.Println("Add new candles intervals")
 	queryStr = `
 	INSERT INTO candle_interval (name)
 	SELECT DISTINCT temp.interval_name
@@ -214,7 +212,6 @@ func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error)
 	}
 
 	// Get unknown Instruments
-	log.Println("Get unknown instruments list")
 	queryStr = `
 	SELECT temp.interval_name
 	FROM temp_candle as temp
@@ -254,7 +251,6 @@ func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error)
 	}
 
 	// Copy candles from temp table into production
-	log.Println("Copy candles from temp table into prod")
 	queryStr = `
 	INSERT INTO candle (ts, instrument_id, interval_id,
 		open_price, close_price, high_price, low_price, volume)
