@@ -13,6 +13,7 @@ func ExecQueryWithAttempts(db *sql.DB, queryStr string, maxAttempts uint) (err e
 	var success bool = false
 	var attempt uint = 0
 	for !success {
+		log.Println("Execute query: ", queryStr)
 		// Execute query
 		_, err = db.Exec(queryStr)
 		// Check err
