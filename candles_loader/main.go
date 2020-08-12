@@ -22,6 +22,9 @@ var configurationFilePathPtr = flag.String("c", "config.json", "Configuration Fi
 var configuration = config.Configuration{}
 
 func main() {
+	// Setup logger
+	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
+
 	// Parse Arguments
 	flag.Parse()
 
@@ -45,6 +48,13 @@ func main() {
 		Hosname:  configuration.DbHosname,
 		Port:     configuration.DbPort,
 		DbName:   configuration.DbName}
+
+	// Wait DB init
+	err = db.WaitDbInit(dbConfiguration, 10)
+	// Check error
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	// Read Global Rank Companies rating
 	globalRanks, err := globalrank.ReadGlobalRankCsv(configuration.GlobalRankCsvFilePath)

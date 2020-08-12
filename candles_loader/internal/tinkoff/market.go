@@ -88,7 +88,6 @@ func GetCandlesPerDay(
 		if err != nil {
 			// Check attempts counter
 			if attempt == maxAttempts {
-				log.Fatalln("maxAttempts count reached")
 				return nil, err
 			}
 			// New attempt

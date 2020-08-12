@@ -24,7 +24,6 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 	defer db.Close()
 
 	// Create Temp table
-	log.Println("Create temp table for instruments")
 	queryStr := `CREATE TEMPORARY TABLE temp_instrument(
 		id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 		figi VARCHAR(255) NOT NULL,
@@ -93,7 +92,6 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 	}
 
 	// Copy only new rows from temp table into production
-	log.Println("Copy instruments data from temp table into prod")
 	queryStr = `
 	INSERT INTO instrument (figi, ticker, name, min_price_increment, currency, type, global_rank)
 	SELECT temp.figi, temp.ticker, temp.name, temp.min_price_increment, temp.currency, temp.type, temp.global_rank
