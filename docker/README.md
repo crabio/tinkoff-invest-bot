@@ -6,6 +6,10 @@ For stopping all containers execute: `docker stop $(docker ps -a -q)`
 
 For removing all containers and data execute: `docker system prune --volumes`
 
+## Configuration
+
+Create file `.env` with reqired TOKENS and optional another settings or add all settings into `docker-compose.yml` file.
+
 ## Run
 
 For running, execute:
