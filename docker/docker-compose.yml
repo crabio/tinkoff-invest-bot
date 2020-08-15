@@ -58,7 +58,7 @@ services:
     environment:
       - GLOBAL_RANK_CSV_FILE_PATH=/data/companies_rank.csv
       - START_LOAD_DATE=2018-01-01T00:00:00.000Z
-      - MAX_ATTEMPTS=10
+      - MAX_ATTEMPTS=20
       - CANDLE_INTERVAL=15min
       - DB_TYPE=postgres
       - DB_USER=postgres

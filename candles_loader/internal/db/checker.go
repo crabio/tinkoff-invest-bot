@@ -101,7 +101,7 @@ func GetLattestLoadedDay(config Configuration, startDate time.Time) (lattestTime
 	defer db.Close()
 
 	// Get max day from loaded days table
-	queryStr := `SELECT MAX(day) FROM candle_loaded_day WHERE day > $1;`
+	queryStr := `SELECT MAX(day) FROM candle_loaded_day WHERE day >= $1;`
 
 	// Execute query
 	row := db.QueryRow(queryStr, startDate)

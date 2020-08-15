@@ -72,17 +72,13 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	// Get latest loaded day in DB
+	// Get latest loaded day from DB
 	lattestTimestamp, err := db.GetLattestLoadedDay(dbConfiguration, configuration.StartLoadDate)
 	// Check error
 	if err != nil {
-		log.Println("Lattest timestamp in candles wasn't found")
+		log.Println("Lattest date in loaded days wasn't found")
 		lattestTimestamp = configuration.StartLoadDate
 	}
-	// Get start of the day
-	lattestTimestamp = date.Bod(lattestTimestamp)
-	// // Go back for one day to reload last day
-	// lattestTimestamp = lattestTimestamp.AddDate(0, 0, -1)
 
 	// Delete first day data
 	db.DeleteCandlesFromDay(dbConfiguration, lattestTimestamp)
@@ -90,48 +86,59 @@ func main() {
 	// Delete uploaded days
 	db.DeleteUploadedDaysFromDay(dbConfiguration, lattestTimestamp)
 
-	// Generate date sequence
-	daySequence := date.GenerateDaySequence(lattestTimestamp, time.Now())
+	// Forever upload new data for day
+	for true {
+		// Generate date sequence
+		daySequence := date.GenerateDaySequence(lattestTimestamp, time.Now())
 
-	// Itterate over all days in sequence
-	for dateX, date := range daySequence {
-		log.Printf("Load data for date %d/%d: %v", dateX, len(daySequence), date)
-		// Get candles for all instruments for one day
-		for instrumentX, instrument := range globalRankInstuments {
-			log.Printf("Load data for instrument %d/%d: '%v'", instrumentX, len(globalRankInstuments), instrument.Name)
-			// Get candles
-			candles, err := tinkoff.GetCandlesPerDay(configuration.ProductionToken,
-				instrument,
-				sdk.CandleInterval(configuration.CandleInterval),
-				date,
-				configuration.MaxAttempts)
-			// Check error
-			if err != nil {
-				log.Println("Maybe problem with production token: ",
-					configuration.ProductionToken,
-					" or Internet onnection.")
-				log.Fatalln(err)
+		// Itterate over all days in sequence
+		for dateX, date := range daySequence {
+			log.Printf("Load data for date %d/%d: %v", dateX, len(daySequence), date)
+			// Get candles for all instruments for one day
+			for instrumentX, instrument := range globalRankInstuments {
+				log.Printf("Load data for instrument %d/%d: '%v'", instrumentX, len(globalRankInstuments), instrument.Name)
+				// Get candles
+				candles, err := tinkoff.GetCandlesPerDay(configuration.ProductionToken,
+					instrument,
+					sdk.CandleInterval(configuration.CandleInterval),
+					date,
+					configuration.MaxAttempts)
+				// Check error
+				if err != nil {
+					log.Println("Maybe problem with production token: ",
+						configuration.ProductionToken,
+						" or Internet onnection.")
+					log.Fatalln(err)
+				}
+
+				// Load candles into DB
+				err = db.UploadCandlesIntoDB(dbConfiguration, candles)
+				// Check error
+				if err != nil {
+					log.Fatalln(err)
+				}
 			}
 
-			// Load candles into DB
-			err = db.UploadCandlesIntoDB(dbConfiguration, candles)
+			// Add uploaded day into DB
+			err = db.UploadNewLoadedDayIntoDB(dbConfiguration, date)
 			// Check error
 			if err != nil {
 				log.Fatalln(err)
 			}
 		}
 
-		// Add uploaded day into DB
-		err = db.UploadNewLoadedDayIntoDB(dbConfiguration, date)
+		// Get latest loaded day from DB
+		lattestTimestamp, err = db.GetLattestLoadedDay(dbConfiguration, configuration.StartLoadDate)
 		// Check error
 		if err != nil {
-			log.Fatalln(err)
+			log.Println("Lattest date in loaded days wasn't found")
+			lattestTimestamp = configuration.StartLoadDate
 		}
-	}
+		// Go to next day
+		lattestTimestamp = lattestTimestamp.AddDate(0, 0, 1)
 
-	// Wait forever
-	for true {
-		time.Sleep(60 * time.Second)
+		// Wait next day
+		time.Sleep(1 * time.Hour)
 	}
 }
 

@@ -12,6 +12,12 @@ For running, execute:
 
 * `docker-compose up -d`
 
+## Stop
+
+For stopping and delete DB, execute:
+
+* `docker-compose down --remove-orphans`
+
 ## Monitoring
 
 For monitoring we are using `dockprom`.
