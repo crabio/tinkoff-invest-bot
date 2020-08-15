@@ -12,8 +12,7 @@ func TestGenerateDaySequence(t *testing.T) {
 	// Create expected result
 	expected := []time.Time{time.Date(2020, 2, 13, 13, 54, 33, 69, time.UTC),
 		time.Date(2020, 2, 14, 13, 54, 33, 69, time.UTC),
-		time.Date(2020, 2, 15, 13, 54, 33, 69, time.UTC),
-		time.Date(2020, 2, 16, 13, 54, 33, 69, time.UTC)}
+		time.Date(2020, 2, 15, 13, 54, 33, 69, time.UTC)}
 	// Check result len
 	if len(result) != len(expected) {
 		t.Error("Expected len ", len(expected), ", got ", len(result))
