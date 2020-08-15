@@ -74,11 +74,19 @@ func WaitDbInit(config Configuration, maxAttempts uint) (err error) {
 		return err
 	}
 
+	// Check loaded day table
+	err = ExecQueryWithAttempts(db, "SELECT 1 FROM candle_loaded_day;", maxAttempts)
+	// Check err
+	if err != nil {
+		log.Printf("Table candle_loaded_day in DB is not inited.")
+		return err
+	}
+
 	return nil
 }
 
-// GetLattestCandleTimestamp gets lattest candle timestamp from DB, starts from startDate
-func GetLattestCandleTimestamp(config Configuration, startDate time.Time) (lattestTimestamp time.Time, err error) {
+// GetLattestLoadedDay gets lattest loaded day from DB, starts from startDate
+func GetLattestLoadedDay(config Configuration, startDate time.Time) (lattestTimestamp time.Time, err error) {
 	// Create onnection string
 	connectionString := fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=disable",
 		config.Type, config.User, config.Password, config.Hosname, config.Port, config.DbName)
@@ -92,9 +100,8 @@ func GetLattestCandleTimestamp(config Configuration, startDate time.Time) (latte
 	// At the end close connetion
 	defer db.Close()
 
-	// Get unknown Instruments
-	log.Println("Get unknown instruments list")
-	queryStr := `SELECT MAX(ts) FROM candle WHERE ts < $1;`
+	// Get max day from loaded days table
+	queryStr := `SELECT MAX(day) FROM candle_loaded_day WHERE day > $1;`
 
 	// Execute query
 	row := db.QueryRow(queryStr, startDate)

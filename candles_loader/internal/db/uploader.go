@@ -6,6 +6,7 @@ import (
 	"github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 	"github.com/lib/pq"
 	"log"
+	"time"
 )
 
 // UploadNewInstrumentsIntoDB upload instruments meta information into data base
@@ -107,6 +108,59 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 	}
 
 	return nil
+}
+
+// UploadNewLoadedDayIntoDB upload loaded day into data base list
+func UploadNewLoadedDayIntoDB(config Configuration, loadedDay time.Time) (err error) {
+	// Create onnection string
+	connectionString := fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=disable",
+		config.Type, config.User, config.Password, config.Hosname, config.Port, config.DbName)
+
+	// Connect to DB
+	db, err := sql.Open(config.Type, connectionString)
+	// Check err
+	if err != nil {
+		return err
+	}
+	// At the end close connetion
+	defer db.Close()
+
+	// Start transaction
+	txn, err := db.Begin()
+	// Check err
+	if err != nil {
+		return err
+	}
+
+	// Prepare copy query
+	stmt, err := txn.Prepare(pq.CopyIn(
+		"candle_loaded_day", "day"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Insert day
+	_, err = stmt.Exec(loadedDay)
+	// Check error
+	if err != nil {
+		return err
+	}
+
+	// Close statement
+	err = stmt.Close()
+	// Check error
+	if err != nil {
+		return err
+	}
+
+	// Commit transaction
+	err = txn.Commit()
+	// Check error
+	if err != nil {
+		return err
+	}
+
+	return
 }
 
 // UploadCandlesIntoDB upload candles into data base

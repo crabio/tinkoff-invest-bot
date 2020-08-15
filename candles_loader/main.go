@@ -4,7 +4,6 @@ import (
 	"flag"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/db"
 	"log"
-	"sync"
 	"time"
 
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
@@ -73,8 +72,8 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	// Get latest candle date in DB
-	lattestTimestamp, err := db.GetLattestCandleTimestamp(dbConfiguration, configuration.StartLoadDate)
+	// Get latest loaded day in DB
+	lattestTimestamp, err := db.GetLattestLoadedDay(dbConfiguration, configuration.StartLoadDate)
 	// Check error
 	if err != nil {
 		log.Println("Lattest timestamp in candles wasn't found")
@@ -82,9 +81,14 @@ func main() {
 	}
 	// Get start of the day
 	lattestTimestamp = date.Bod(lattestTimestamp)
+	// // Go back for one day to reload last day
+	// lattestTimestamp = lattestTimestamp.AddDate(0, 0, -1)
 
 	// Delete first day data
 	db.DeleteCandlesFromDay(dbConfiguration, lattestTimestamp)
+
+	// Delete uploaded days
+	db.DeleteUploadedDaysFromDay(dbConfiguration, lattestTimestamp)
 
 	// Generate date sequence
 	daySequence := date.GenerateDaySequence(lattestTimestamp, time.Now())
@@ -116,6 +120,18 @@ func main() {
 				log.Fatalln(err)
 			}
 		}
+
+		// Add uploaded day into DB
+		err = db.UploadNewLoadedDayIntoDB(dbConfiguration, date)
+		// Check error
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+
+	// Wait forever
+	for true {
+		time.Sleep(60 * time.Second)
 	}
 }
 
@@ -131,28 +147,16 @@ func MatchGlobalRankOnstruments(globalRanks []globalrank.GlobalRank) (globalRank
 	}
 
 	// Match global rank and Tinkoff instruments
-	counter := 0
-	var wg sync.WaitGroup
-
 	for _, globalRank := range globalRanks {
-		// These goroutines share memory, but only for reading.
-		wg.Add(1)
-
-		go func(globalRank globalrank.GlobalRank) {
-
-			for _, instrument := range instruments {
-				// Match
-				if smetrics.JaroWinkler(globalRank.Name, instrument.Name, 0.7, 4) > 0.9 {
-					counter++
-					// Add to globalRankInstruments
-					globalRankInstruments = append(globalRankInstruments, instrument)
-				}
+		for _, instrument := range instruments {
+			// Match
+			if smetrics.JaroWinkler(globalRank.Name, instrument.Name, 0.7, 4) > 0.9 {
+				// Add to globalRankInstruments
+				globalRankInstruments = append(globalRankInstruments, instrument)
 			}
-
-			wg.Done()
-		}(globalRank)
+		}
 	}
-	wg.Wait()
-	log.Printf("Founded %d/%d Tinkoff Instruments in GLobal Rank", counter, len(globalRanks))
+
+	log.Printf("Founded %d/%d Tinkoff Instruments in GLobal Rank", len(globalRankInstruments), len(globalRanks))
 	return
 }

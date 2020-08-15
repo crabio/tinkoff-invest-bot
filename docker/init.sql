@@ -39,3 +39,10 @@ SELECT create_hypertable
     ('candle',
      'ts',
      chunk_time_interval => interval '1 week');
+
+
+-- Loaded candle days list
+-- Persistent storage for storing list of loaded data for save info about dates without candles
+CREATE TABLE IF NOT EXISTS candle_loaded_day (
+    day DATE NOT NULL PRIMARY KEY
+);
