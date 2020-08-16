@@ -24,7 +24,7 @@ func DeleteUploadedDaysFromDay(config Configuration, timestamp time.Time) (err e
 	defer db.Close()
 
 	// Get start of the day
-	starOfTheDay := date.Bod(timestamp)
+	starOfTheDay := date.BeginOfDay(timestamp)
 
 	// Copy candles from temp table into production
 	log.Println("Delete loaded days from: ", starOfTheDay)
@@ -57,7 +57,7 @@ func DeleteCandlesFromDay(config Configuration, timestamp time.Time) (err error)
 	defer db.Close()
 
 	// Get start of the day
-	starOfTheDay := date.Bod(timestamp)
+	starOfTheDay := date.BeginOfDay(timestamp)
 
 	// Copy candles from temp table into production
 	log.Println("Delete candles data from: ", starOfTheDay)

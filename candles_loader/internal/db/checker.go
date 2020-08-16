@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// ExecQueryWithAttempts pollling query untill it's success or timeout is reached. 1 attempt = 1 second
+// ExecQueryWithAttempts polling query untill it's success or timeout is reached. 1 attempt = 1 second
 func ExecQueryWithAttempts(db *sql.DB, queryStr string, maxAttempts uint) (err error) {
 	// Until not success ot attemps out of range
 	var success bool = false
@@ -33,7 +33,7 @@ func ExecQueryWithAttempts(db *sql.DB, queryStr string, maxAttempts uint) (err e
 	return nil
 }
 
-// WaitDbInit pollling DB untill it's correctrly inited or timeout is reached. 1 attempt = 1 second
+// WaitDbInit polling DB untill it's correctrly inited or timeout is reached. 1 attempt = 1 second
 func WaitDbInit(config Configuration, maxAttempts uint) (err error) {
 	log.Printf("Wait for DB init.")
 

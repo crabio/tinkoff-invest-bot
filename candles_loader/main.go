@@ -17,8 +17,11 @@ import (
 // Configuration File Path. Default "config.json"
 var configurationFilePathPtr = flag.String("c", "config.json", "Configuration File Path")
 
-// Configuration Structure
-var configuration = config.Configuration{}
+// Configuration from file Structure
+var configurationFromFile = config.ConfigurationFile{}
+
+// Configuration from environment variables Structure
+var configurationFromEnv = config.ReadFromEnv()
 
 func main() {
 	// Setup logger
@@ -27,26 +30,25 @@ func main() {
 	// Parse Arguments
 	flag.Parse()
 
+	log.Println("configurationFilePathPtr: ", configurationFilePathPtr)
+
 	// Init error var
 	var err error
 	// Parse Config from JSON
-	configuration, err = config.ReadFromFile(*configurationFilePathPtr)
+	configurationFromFile, err = config.ReadFromFile(*configurationFilePathPtr)
 	// Check error
 	if err != nil {
 		log.Println(err)
 	}
 
-	// Extend config with ENV parameters
-	configuration = config.ExtendWithEnvFlags(configuration)
-
 	// Create database configuration
 	dbConfiguration := db.Configuration{
-		Type:     configuration.DbType,
-		User:     configuration.DbUser,
-		Password: configuration.DbPassword,
-		Hosname:  configuration.DbHosname,
-		Port:     configuration.DbPort,
-		DbName:   configuration.DbName}
+		Type:     configurationFromEnv.DbType,
+		User:     configurationFromEnv.DbUser,
+		Password: configurationFromEnv.DbPassword,
+		Hosname:  configurationFromEnv.DbHosname,
+		Port:     configurationFromEnv.DbPort,
+		DbName:   configurationFromEnv.DbName}
 
 	// Wait DB init
 	err = db.WaitDbInit(dbConfiguration, 10)
@@ -56,7 +58,7 @@ func main() {
 	}
 
 	// Read Global Rank Companies rating
-	globalRanks, err := globalrank.ReadGlobalRankCsv(configuration.GlobalRankCsvFilePath)
+	globalRanks, err := globalrank.ReadGlobalRankCsv(configurationFromEnv.GlobalRankCsvFilePath)
 	// Check error
 	if err != nil {
 		log.Fatalln(err)
@@ -73,11 +75,11 @@ func main() {
 	}
 
 	// Get latest loaded day from DB
-	lattestTimestamp, err := db.GetLattestLoadedDay(dbConfiguration, configuration.StartLoadDate)
+	lattestTimestamp, err := db.GetLattestLoadedDay(dbConfiguration, configurationFromFile.StartLoadDate)
 	// Check error
 	if err != nil {
 		log.Println("Lattest date in loaded days wasn't found")
-		lattestTimestamp = configuration.StartLoadDate
+		lattestTimestamp = configurationFromFile.StartLoadDate
 	}
 
 	// Delete first day data
@@ -98,15 +100,15 @@ func main() {
 			for instrumentX, instrument := range globalRankInstuments {
 				log.Printf("Load data for instrument %d/%d: '%v'", instrumentX, len(globalRankInstuments), instrument.Name)
 				// Get candles
-				candles, err := tinkoff.GetCandlesPerDay(configuration.ProductionToken,
+				candles, err := tinkoff.GetCandlesPerDay(configurationFromFile.ProductionToken,
 					instrument,
-					sdk.CandleInterval(configuration.CandleInterval),
+					sdk.CandleInterval(configurationFromEnv.CandleInterval),
 					date,
-					configuration.MaxAttempts)
+					configurationFromEnv.MaxAttempts)
 				// Check error
 				if err != nil {
 					log.Println("Maybe problem with production token: ",
-						configuration.ProductionToken,
+						configurationFromFile.ProductionToken,
 						" or Internet onnection.")
 					log.Fatalln(err)
 				}
@@ -128,11 +130,11 @@ func main() {
 		}
 
 		// Get latest loaded day from DB
-		lattestTimestamp, err = db.GetLattestLoadedDay(dbConfiguration, configuration.StartLoadDate)
+		lattestTimestamp, err = db.GetLattestLoadedDay(dbConfiguration, configurationFromFile.StartLoadDate)
 		// Check error
 		if err != nil {
 			log.Println("Lattest date in loaded days wasn't found")
-			lattestTimestamp = configuration.StartLoadDate
+			lattestTimestamp = configurationFromFile.StartLoadDate
 		}
 		// Go to next day
 		lattestTimestamp = lattestTimestamp.AddDate(0, 0, 1)
@@ -145,10 +147,10 @@ func main() {
 // MatchGlobalRankOnstruments match list of Global Rank and Tinkoff Instruments
 func MatchGlobalRankOnstruments(globalRanks []globalrank.GlobalRank) (globalRankInstruments []sdk.Instrument) {
 	// Get all Tinkoff Markets
-	instruments, err := tinkoff.GetAllMarkets(configuration.ProductionToken)
+	instruments, err := tinkoff.GetAllMarkets(configurationFromFile.ProductionToken)
 	if err != nil {
 		log.Println("Maybe problem with production token: ",
-			configuration.ProductionToken,
+			configurationFromFile.ProductionToken,
 			" or Internet onnection.")
 		log.Fatalln(err)
 	}

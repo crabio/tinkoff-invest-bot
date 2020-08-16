@@ -22,18 +22,12 @@ Config file example:
 {
     "SandboxToken": "<YOUR TOKEN>",
     "ProductionToken": "YOUR TOKEN",
-    "GlobalRankCsvFilePath": "../data/companies_rank.csv",
-    "StartLoadDate": "2020-01-02T00:00:00.000Z",
-    "MaxAttempts": 10,
-    "CandleInterval": "15min",
-    "DbType": "postgres",
-    "DbUser": "postgres",
-    "DbPassword": "postgres",
-    "DbHosname": "timescaledb",
-    "DbPort": 5432,
-    "DbName": "tinkoff"
+    "StartLoadDate": "2020-01-02T00:00:00.000Z"
 }
 ```
+
+Configuration  file  should be placed in `/tinkoff-invest-bot/config/config.json`
+as signle configuration point for all services.
 
 ## Build
 
@@ -45,10 +39,7 @@ For run app in docker use: `bash scripts/build_docker.sh`
 
 Application has ENV flags for configuring all required config fields:
 
-* SANDBOX_TOKEN ""
-* PRODUCTION_TOKEN ""
 * GLOBAL_RANK_CSV_FILE_PATH "/data/companies_rank.csv"
-* START_LOAD_DATE "2020-01-01T00:00:00.000Z"
 * MAX_ATTEMPTS 10
 * CANDLE_INTERVAL "15min" - Allowed candles interval are: "1min","2min","3min","5min","10min","15min","30min","hour","2hour","4hour","day","week","month"
 * DB_TYPE "postgres"
@@ -57,24 +48,6 @@ Application has ENV flags for configuring all required config fields:
 * DB_HOSTNAME "timescaledb"
 * DB_PORT 5432
 * DB_NAME "tinkoff"
-
-It usefull to create `.env` like:
-
-```env
-SANDBOX_TOKEN=<your token>
-PRODUCTION_TOKEN=<your token>
-GLOBAL_RANK_CSV_FILE_PATH=/data/companies_rank.csv
-START_LOAD_DATE=2020-01-01T00:00:00.000Z
-MAX_ATTEMPTS=10
-CANDLE_INTERVAL=15min
-# DB args
-DB_TYPE=postgres
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_HOSTNAME=host.docker.internal
-DB_PORT=5432
-DB_NAME=tinkoff
-```
 
 For running use: `docker run -v /tinkoff-invest-bot/data/:/data --env-file .env --name candles-loader -d candles-loader`
 

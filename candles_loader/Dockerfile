@@ -1,10 +1,7 @@
 FROM golang:latest
 
 # Add env arguments
-ENV SANDBOX_TOKEN ""
-ENV PRODUCTION_TOKEN ""
 ENV GLOBAL_RANK_CSV_FILE_PATH "/data/companies_rank.csv"
-ENV START_LOAD_DATE "2020-01-01T00:00:00.000Z"
 ENV MAX_ATTEMPTS 20
 ENV CANDLE_INTERVAL "15min"
 # DB args
@@ -28,4 +25,4 @@ WORKDIR /app
 RUN GOOS=linux CGO_ENABLED=0 go build -o main . 
 
 # Run main app
-CMD ["/app/main"]
+CMD ["/app/main", "-c", "/config/config.json"]

@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-func TestBod(t *testing.T) {
+func TesteginOfDay(t *testing.T) {
 	// Run function
-	result := date.Bod(time.Date(2020, 2, 13, 13, 54, 33, 69, time.UTC))
+	result := date.BeginOfDay(time.Date(2020, 2, 13, 13, 54, 33, 69, time.UTC))
 	// Create expected result
 	expected := time.Date(2020, 2, 13, 0, 0, 0, 0, time.UTC)
 	// Check result

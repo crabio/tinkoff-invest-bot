@@ -4,12 +4,16 @@ import (
 	"time"
 )
 
-// Configuration - struct which contains config info for app
-type Configuration struct {
-	SandboxToken          string
-	ProductionToken       string
+// ConfigurationFile - struct which contains config info for app from file
+type ConfigurationFile struct {
+	SandboxToken    string
+	ProductionToken string
+	StartLoadDate   time.Time
+}
+
+// ConfigurationEnv - struct which contains config info for app fron environment variables
+type ConfigurationEnv struct {
 	GlobalRankCsvFilePath string
-	StartLoadDate         time.Time
 	MaxAttempts           uint
 	CandleInterval        string
 	// DB Configuration

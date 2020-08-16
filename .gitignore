@@ -1,5 +1,8 @@
 # Ignore data folder
 data/*
 
+# Ignore config folder
+config/*
+
 # ignore Jupyter checck points
 .ipynb_checkpoints

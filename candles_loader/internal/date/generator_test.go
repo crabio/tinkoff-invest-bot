@@ -17,7 +17,7 @@ func TestGenerateDaySequence(t *testing.T) {
 	if len(result) != len(expected) {
 		t.Error("Expected len ", len(expected), ", got ", len(result))
 	}
-	// Checck each element
+	// Check each element
 	for i := range result {
 		if result[i] != expected[i] {
 			t.Error("Expected el #", i, " ", expected[i], ", got ", result[i])

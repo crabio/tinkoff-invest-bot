@@ -8,7 +8,24 @@ For removing all containers and data execute: `docker system prune --volumes`
 
 ## Configuration
 
-Create file `.env` with reqired TOKENS and optional another settings or add all settings into `docker-compose.yml` file.
+### Overal
+
+Config file example:
+
+```json
+{
+    "SandboxToken": "<YOUR TOKEN>",
+    "ProductionToken": "YOUR TOKEN",
+    "StartLoadDate": "2020-01-02T00:00:00.000Z"
+}
+```
+
+Configuration  file  should be placed in `/tinkoff-invest-bot/config/config.json`
+as signle configuration point for all services.
+
+### Superset
+
+For Superset (BI) configuration we use `superset.env`.
 
 ## Run
 
