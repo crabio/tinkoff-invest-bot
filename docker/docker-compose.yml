@@ -1,0 +1,47 @@
+version: "3.7"
+        
+volumes:
+  timescaledb:
+
+services:
+# Timescale DB
+  timescaledb:
+    image: timescale/timescaledb:latest-pg11
+    container_name: timescaledb
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - timescaledb:/var/lib/postgresql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: unless-stopped
+    environment:
+      - ADMINER_DEFAULT_SERVER=timescaledb
+    ports:
+      - 1000:8080
+
+  candles_loader:
+    build: 
+      context: ../candles_loader
+    container_name: candles_loader
+    restart: unless-stopped
+    environment:
+      - GLOBAL_RANK_CSV_FILE_PATH=/data/companies_rank.csv
+      - MAX_ATTEMPTS=20
+      - CANDLE_INTERVAL=15min
+      - DB_TYPE=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOSTNAME=host.docker.internal
+      - DB_PORT=5432
+      - DB_NAME=tinkoff
+    volumes:
+      - ./../data/:/data
+      - ./../config/:/config

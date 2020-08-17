@@ -1,0 +1,11 @@
+# Ignore Go packages
+vendor
+
+# Ignore Binary
+build/*
+
+# Ingore env files
+.env
+
+# Ignore test coverage profile
+profile.cov

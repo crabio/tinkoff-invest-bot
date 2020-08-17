@@ -1,0 +1,22 @@
+name: Docker
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+
+  build-docker-compose:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+        run:
+          shell: bash
+          working-directory: docker
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Build Docker Compose
+        run: docker-compose build

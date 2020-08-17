@@ -1,0 +1,38 @@
+name: Go
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+
+  build-candles-loader:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: candles_loader
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+            go-version: ^1.13
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      
+      - name: Build
+        run: go build -v
+      
+      - name: Build for Linux
+        run: GOOS=linux CGO_ENABLED=0 go build -v
+
+      - name: Test
+        run: go test -v -coverpkg=./... -coverprofile=profile.cov ./...
+
+      - name: Test Coverage
+        run: go tool cover -func profile.cov
