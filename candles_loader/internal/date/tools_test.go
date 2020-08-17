@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TesteginOfDay(t *testing.T) {
+func TestBeginOfDay(t *testing.T) {
 	// Run function
 	result := date.BeginOfDay(time.Date(2020, 2, 13, 13, 54, 33, 69, time.UTC))
 	// Create expected result

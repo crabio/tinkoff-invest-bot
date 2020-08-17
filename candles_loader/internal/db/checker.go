@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"time"
 )
@@ -37,12 +36,8 @@ func ExecQueryWithAttempts(db *sql.DB, queryStr string, maxAttempts uint) (err e
 func WaitDbInit(config Configuration, maxAttempts uint) (err error) {
 	log.Printf("Wait for DB init.")
 
-	// Create onnection string
-	connectionString := fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=disable",
-		config.Type, config.User, config.Password, config.Hosname, config.Port, config.DbName)
-
 	// Connect to DB
-	db, err := sql.Open(config.Type, connectionString)
+	db, err := CreateDbConnection(config)
 	// Check err
 	if err != nil {
 		return
@@ -87,12 +82,8 @@ func WaitDbInit(config Configuration, maxAttempts uint) (err error) {
 
 // GetLattestLoadedDay gets lattest loaded day from DB, starts from startDate
 func GetLattestLoadedDay(config Configuration, startDate time.Time) (lattestTimestamp time.Time, err error) {
-	// Create onnection string
-	connectionString := fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=disable",
-		config.Type, config.User, config.Password, config.Hosname, config.Port, config.DbName)
-
 	// Connect to DB
-	db, err := sql.Open(config.Type, connectionString)
+	db, err := CreateDbConnection(config)
 	// Check err
 	if err != nil {
 		return

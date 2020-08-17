@@ -1,8 +1,6 @@
 package db
 
 import (
-	"database/sql"
-	"fmt"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/date"
 	"log"
 	"time"
@@ -10,12 +8,8 @@ import (
 
 // DeleteUploadedDaysFromDay delete uploaded days from DB starts from specific day
 func DeleteUploadedDaysFromDay(config Configuration, timestamp time.Time) (err error) {
-	// Create connection string
-	connectionString := fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=disable",
-		config.Type, config.User, config.Password, config.Hosname, config.Port, config.DbName)
-
 	// Connect to DB
-	db, err := sql.Open(config.Type, connectionString)
+	db, err := CreateDbConnection(config)
 	// Check err
 	if err != nil {
 		return err
@@ -43,12 +37,8 @@ func DeleteUploadedDaysFromDay(config Configuration, timestamp time.Time) (err e
 
 // DeleteCandlesFromDay delete candles from DB starts from specific day
 func DeleteCandlesFromDay(config Configuration, timestamp time.Time) (err error) {
-	// Create connection string
-	connectionString := fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=disable",
-		config.Type, config.User, config.Password, config.Hosname, config.Port, config.DbName)
-
 	// Connect to DB
-	db, err := sql.Open(config.Type, connectionString)
+	db, err := CreateDbConnection(config)
 	// Check err
 	if err != nil {
 		return err

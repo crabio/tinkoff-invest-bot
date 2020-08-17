@@ -1,7 +1,6 @@
 package db
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 	"github.com/lib/pq"
@@ -11,12 +10,8 @@ import (
 
 // UploadNewInstrumentsIntoDB upload instruments meta information into data base
 func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrument) (err error) {
-	// Create onnection string
-	connectionString := fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=disable",
-		config.Type, config.User, config.Password, config.Hosname, config.Port, config.DbName)
-
 	// Connect to DB
-	db, err := sql.Open(config.Type, connectionString)
+	db, err := CreateDbConnection(config)
 	// Check err
 	if err != nil {
 		return err
@@ -43,14 +38,14 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 	}
 
 	// Start transaction
-	txn, err := db.Begin()
+	transaction, err := db.Begin()
 	// Check err
 	if err != nil {
 		return err
 	}
 
 	// Prepare copy query into temp table
-	stmt, err := txn.Prepare(pq.CopyIn(
+	statement, err := transaction.Prepare(pq.CopyIn(
 		"temp_instrument", "figi", "ticker", "name", "min_price_increment", "currency", "type", "global_rank"))
 	if err != nil {
 		log.Fatal(err)
@@ -59,7 +54,7 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 	// Insert each instrument
 	for _, instrument := range instruments {
 		// Execute query
-		_, err = stmt.Exec(instrument.FIGI,
+		_, err = statement.Exec(instrument.FIGI,
 			instrument.Ticker,
 			instrument.Name,
 			instrument.MinPriceIncrement,
@@ -72,21 +67,21 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 		}
 	}
 	// Final exec to close loading process
-	_, err = stmt.Exec()
+	_, err = statement.Exec()
 	// Check error
 	if err != nil {
 		return err
 	}
 
 	// Close statement
-	err = stmt.Close()
+	err = statement.Close()
 	// Check error
 	if err != nil {
 		return err
 	}
 
 	// Commit transaction
-	err = txn.Commit()
+	err = transaction.Commit()
 	// Check error
 	if err != nil {
 		return err
@@ -112,12 +107,8 @@ func UploadNewInstrumentsIntoDB(config Configuration, instruments []sdk.Instrume
 
 // UploadNewLoadedDayIntoDB upload loaded day into data base list
 func UploadNewLoadedDayIntoDB(config Configuration, loadedDay time.Time) (err error) {
-	// Create onnection string
-	connectionString := fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=disable",
-		config.Type, config.User, config.Password, config.Hosname, config.Port, config.DbName)
-
 	// Connect to DB
-	db, err := sql.Open(config.Type, connectionString)
+	db, err := CreateDbConnection(config)
 	// Check err
 	if err != nil {
 		return err
@@ -126,35 +117,35 @@ func UploadNewLoadedDayIntoDB(config Configuration, loadedDay time.Time) (err er
 	defer db.Close()
 
 	// Start transaction
-	txn, err := db.Begin()
+	transaction, err := db.Begin()
 	// Check err
 	if err != nil {
 		return err
 	}
 
 	// Prepare copy query
-	stmt, err := txn.Prepare(pq.CopyIn(
+	statement, err := transaction.Prepare(pq.CopyIn(
 		"candle_loaded_day", "day"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Insert day
-	_, err = stmt.Exec(loadedDay)
+	_, err = statement.Exec(loadedDay)
 	// Check error
 	if err != nil {
 		return err
 	}
 
 	// Close statement
-	err = stmt.Close()
+	err = statement.Close()
 	// Check error
 	if err != nil {
 		return err
 	}
 
 	// Commit transaction
-	err = txn.Commit()
+	err = transaction.Commit()
 	// Check error
 	if err != nil {
 		return err
@@ -165,12 +156,8 @@ func UploadNewLoadedDayIntoDB(config Configuration, loadedDay time.Time) (err er
 
 // UploadCandlesIntoDB upload candles into data base
 func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error) {
-	// Create onnection string
-	connectionString := fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=disable",
-		config.Type, config.User, config.Password, config.Hosname, config.Port, config.DbName)
-
 	// Connect to DB
-	db, err := sql.Open(config.Type, connectionString)
+	db, err := CreateDbConnection(config)
 	// Check err
 	if err != nil {
 		return err
@@ -197,14 +184,14 @@ func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error)
 	}
 
 	// Start transaction
-	txn, err := db.Begin()
+	transaction, err := db.Begin()
 	// Check err
 	if err != nil {
 		return err
 	}
 
 	// Prepare copy query into temp table
-	stmt, err := txn.Prepare(pq.CopyIn(
+	statement, err := transaction.Prepare(pq.CopyIn(
 		"temp_candle", "ts", "instrument_figi", "interval_name",
 		"open_price", "close_price", "high_price", "low_price", "volume"))
 	if err != nil {
@@ -214,7 +201,7 @@ func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error)
 	// Insert each instrument
 	for _, candle := range candles {
 		// Execute query
-		_, err = stmt.Exec(candle.TS,
+		_, err = statement.Exec(candle.TS,
 			candle.FIGI,
 			candle.Interval,
 			candle.OpenPrice,
@@ -228,21 +215,21 @@ func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error)
 		}
 	}
 	// Final exec to close loading process
-	_, err = stmt.Exec()
+	_, err = statement.Exec()
 	// Check error
 	if err != nil {
 		return err
 	}
 
 	// Close statement
-	err = stmt.Close()
+	err = statement.Close()
 	// Check error
 	if err != nil {
 		return err
 	}
 
 	// Commit transaction
-	err = txn.Commit()
+	err = transaction.Commit()
 	// Check error
 	if err != nil {
 		return err
