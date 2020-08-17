@@ -35,9 +35,15 @@ For running, execute:
 
 ## Stop
 
-For stopping and delete DB, execute:
+For stopping, execute:
 
-* `docker-compose down --remove-orphans`
+* `docker-compose stop`
+
+## Remove
+
+For stopping and delete all data, execute:
+
+* `docker-compose down -v`
 
 ## Monitoring
 
