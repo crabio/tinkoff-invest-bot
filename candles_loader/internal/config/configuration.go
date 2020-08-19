@@ -20,7 +20,7 @@ type ConfigurationEnv struct {
 	DbType     string // Data Base type, for example "postgres"
 	DbUser     string
 	DbPassword string
-	DbHosname  string
+	DbHostname  string
 	DbPort     uint
 	DbName     string
 }

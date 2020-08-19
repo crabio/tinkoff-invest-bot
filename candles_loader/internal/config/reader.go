@@ -77,11 +77,11 @@ func ReadFromEnv() (configuration ConfigurationEnv) {
 	}
 
 	// Read DB_HOSTNAME flag
-	envDbHosname := os.Getenv("DB_HOSTNAME")
+	envDbHostname := os.Getenv("DB_HOSTNAME")
 	// Check exists
-	if envDbHosname != "" {
-		log.Println("From ENV DbHosname = ", envDbHosname)
-		configuration.DbHosname = envDbHosname
+	if envDbHostname != "" {
+		log.Println("From ENV DbHostname = ", envDbHostname)
+		configuration.DbHostname = envDbHostname
 	}
 
 	// Read DB_PORT flag

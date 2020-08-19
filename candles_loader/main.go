@@ -46,7 +46,7 @@ func main() {
 		Type:     configurationFromEnv.DbType,
 		User:     configurationFromEnv.DbUser,
 		Password: configurationFromEnv.DbPassword,
-		Hosname:  configurationFromEnv.DbHosname,
+		Hostname:  configurationFromEnv.DbHostname,
 		Port:     configurationFromEnv.DbPort,
 		DbName:   configurationFromEnv.DbName}
 
