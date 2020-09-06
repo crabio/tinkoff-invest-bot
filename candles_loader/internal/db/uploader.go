@@ -280,7 +280,7 @@ func UploadCandlesIntoDB(config Configuration, candles []sdk.Candle) (err error)
 	}
 	// Check rows count
 	if len(unknownInstrumentNames) != 0 {
-		return error(fmt.Errorf("Not all instruments are found in DB: %v+", unknownInstrumentNames))
+		return fmt.Errorf("Not all instruments are found in DB: %v+", unknownInstrumentNames)
 	}
 	// Close query itterator
 	err = rows.Close()
