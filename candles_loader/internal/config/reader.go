@@ -1,10 +1,11 @@
 package config
 
 import (
-	"github.com/tkanos/gonfig"
-	"log"
 	"os"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/tkanos/gonfig"
 )
 
 // ReadFromFile Read Configuration struct from JSON file
@@ -13,9 +14,9 @@ func ReadFromFile(filePath string) (configuration ConfigurationFile, err error) 
 	err = gonfig.GetConf(filePath, &configuration)
 
 	// Print read config
-	log.Println("From file ProductionToken = ", configuration.ProductionToken)
-	log.Println("From file SandboxToken = ", configuration.SandboxToken)
-	log.Println("From file StartLoadDate = ", configuration.StartLoadDate)
+	log.Debugln("From file ProductionToken = ", configuration.ProductionToken)
+	log.Debugln("From file SandboxToken = ", configuration.SandboxToken)
+	log.Debugln("From file StartLoadDate = ", configuration.StartLoadDate)
 
 	return
 }
@@ -26,7 +27,7 @@ func ReadFromEnv() (configuration ConfigurationEnv) {
 	envGlobalRankCsvFilePath := os.Getenv("GLOBAL_RANK_CSV_FILE_PATH")
 	// Check exists
 	if envGlobalRankCsvFilePath != "" {
-		log.Println("From ENV GlobalRankCsvFilePath = ", envGlobalRankCsvFilePath)
+		log.Debugln("From ENV GlobalRankCsvFilePath = ", envGlobalRankCsvFilePath)
 		configuration.GlobalRankCsvFilePath = envGlobalRankCsvFilePath
 	}
 
@@ -37,9 +38,9 @@ func ReadFromEnv() (configuration ConfigurationEnv) {
 		envMaxAttempts, err := strconv.Atoi(envMaxAttemptsStr)
 		// Check err
 		if err != nil {
-			log.Println("Error: ", err)
+			log.Debugln("Error: ", err)
 		} else {
-			log.Println("From ENV MaxAttempts = ", uint(envMaxAttempts))
+			log.Debugln("From ENV MaxAttempts = ", uint(envMaxAttempts))
 			configuration.MaxAttempts = uint(envMaxAttempts)
 		}
 	}
@@ -48,7 +49,7 @@ func ReadFromEnv() (configuration ConfigurationEnv) {
 	envCandleInterval := os.Getenv("CANDLE_INTERVAL")
 	// Check exists
 	if envCandleInterval != "" {
-		log.Println("From ENV DbType = ", envCandleInterval)
+		log.Debugln("From ENV DbType = ", envCandleInterval)
 		configuration.CandleInterval = envCandleInterval
 	}
 
@@ -56,7 +57,7 @@ func ReadFromEnv() (configuration ConfigurationEnv) {
 	envDbType := os.Getenv("DB_TYPE")
 	// Check exists
 	if envDbType != "" {
-		log.Println("From ENV DbType = ", envDbType)
+		log.Debugln("From ENV DbType = ", envDbType)
 		configuration.DbType = envDbType
 	}
 
@@ -64,7 +65,7 @@ func ReadFromEnv() (configuration ConfigurationEnv) {
 	envDbUser := os.Getenv("DB_USER")
 	// Check exists
 	if envDbUser != "" {
-		log.Println("From ENV DbUser = ", envDbUser)
+		log.Debugln("From ENV DbUser = ", envDbUser)
 		configuration.DbUser = envDbUser
 	}
 
@@ -72,7 +73,7 @@ func ReadFromEnv() (configuration ConfigurationEnv) {
 	envDbPassword := os.Getenv("DB_PASSWORD")
 	// Check exists
 	if envDbPassword != "" {
-		log.Println("From ENV DbPassword = ", envDbPassword)
+		log.Debugln("From ENV DbPassword = ", envDbPassword)
 		configuration.DbPassword = envDbPassword
 	}
 
@@ -80,7 +81,7 @@ func ReadFromEnv() (configuration ConfigurationEnv) {
 	envDbHostname := os.Getenv("DB_HOSTNAME")
 	// Check exists
 	if envDbHostname != "" {
-		log.Println("From ENV DbHostname = ", envDbHostname)
+		log.Debugln("From ENV DbHostname = ", envDbHostname)
 		configuration.DbHostname = envDbHostname
 	}
 
@@ -91,9 +92,9 @@ func ReadFromEnv() (configuration ConfigurationEnv) {
 		envDbPort, err := strconv.Atoi(envDbPortStr)
 		// Check err
 		if err != nil {
-			log.Println("Error: ", err)
+			log.Debugln("Error: ", err)
 		} else {
-			log.Println("From ENV DbPort = ", envDbPort)
+			log.Debugln("From ENV DbPort = ", envDbPort)
 			configuration.DbPort = uint(envDbPort)
 		}
 	}
@@ -102,7 +103,7 @@ func ReadFromEnv() (configuration ConfigurationEnv) {
 	envDbName := os.Getenv("DB_NAME")
 	// Check exists
 	if envDbName != "" {
-		log.Println("From ENV DbName = ", envDbName)
+		log.Debugln("From ENV DbName = ", envDbName)
 		configuration.DbName = envDbName
 	}
 

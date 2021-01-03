@@ -35,11 +35,11 @@ services:
     environment:
       - GLOBAL_RANK_CSV_FILE_PATH=/data/companies_rank.csv
       - MAX_ATTEMPTS=20
-      - CANDLE_INTERVAL=hour
+      - CANDLE_INTERVAL=5min
       - DB_TYPE=postgres
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_HOSTNAME=host.docker.internal
+      - DB_HOSTNAME=timescaledb
       - DB_PORT=5432
       - DB_NAME=tinkoff
     volumes:

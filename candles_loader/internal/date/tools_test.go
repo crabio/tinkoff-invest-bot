@@ -1,9 +1,10 @@
 package date_test
 
 import (
-	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/date"
 	"testing"
 	"time"
+
+	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/date"
 )
 
 func TestBeginOfDay(t *testing.T) {

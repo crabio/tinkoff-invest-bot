@@ -2,8 +2,9 @@ package db
 
 import (
 	"database/sql"
-	"log"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // ExecQueryWithAttempts polling query untill it's success or timeout is reached. 1 attempt = 1 second
@@ -12,7 +13,7 @@ func ExecQueryWithAttempts(db *sql.DB, queryStr string, maxAttempts uint) (err e
 	var success bool = false
 	var attempt uint = 0
 	for !success {
-		log.Println("Execute query: ", queryStr)
+		log.Debugln("Execute query: ", queryStr)
 		// Execute query
 		_, err = db.Exec(queryStr)
 		// Check err
@@ -34,7 +35,7 @@ func ExecQueryWithAttempts(db *sql.DB, queryStr string, maxAttempts uint) (err e
 
 // WaitDbInit polling DB untill it's correctrly inited or timeout is reached. 1 attempt = 1 second
 func WaitDbInit(config Configuration, maxAttempts uint) (err error) {
-	log.Printf("Wait for DB init.")
+	log.Debugf("Wait for DB init.")
 
 	// Connect to DB
 	db, err := CreateDbConnection(config)
@@ -49,7 +50,7 @@ func WaitDbInit(config Configuration, maxAttempts uint) (err error) {
 	err = ExecQueryWithAttempts(db, "SELECT 1 FROM instrument;", maxAttempts)
 	// Check err
 	if err != nil {
-		log.Printf("Table instrument in DB is not inited.")
+		log.Debugf("Table instrument in DB is not inited.")
 		return err
 	}
 
@@ -57,7 +58,7 @@ func WaitDbInit(config Configuration, maxAttempts uint) (err error) {
 	err = ExecQueryWithAttempts(db, "SELECT 1 FROM candle_interval;", maxAttempts)
 	// Check err
 	if err != nil {
-		log.Printf("Table candle_interval in DB is not inited.")
+		log.Debugf("Table candle_interval in DB is not inited.")
 		return err
 	}
 
@@ -65,7 +66,7 @@ func WaitDbInit(config Configuration, maxAttempts uint) (err error) {
 	err = ExecQueryWithAttempts(db, "SELECT 1 FROM candle;", maxAttempts)
 	// Check err
 	if err != nil {
-		log.Printf("Table candle in DB is not inited.")
+		log.Debugf("Table candle in DB is not inited.")
 		return err
 	}
 
@@ -73,7 +74,7 @@ func WaitDbInit(config Configuration, maxAttempts uint) (err error) {
 	err = ExecQueryWithAttempts(db, "SELECT 1 FROM candle_loaded_day;", maxAttempts)
 	// Check err
 	if err != nil {
-		log.Printf("Table candle_loaded_day in DB is not inited.")
+		log.Debugf("Table candle_loaded_day in DB is not inited.")
 		return err
 	}
 

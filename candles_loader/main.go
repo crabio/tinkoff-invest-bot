@@ -2,14 +2,16 @@ package main
 
 import (
 	"flag"
-	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/db"
-	"log"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/config"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/date"
+	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/db"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/globalrank"
+	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/logger"
 	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/tinkoff"
 	"github.com/xrash/smetrics"
 )
@@ -25,12 +27,14 @@ var configurationFromEnv = config.ReadFromEnv()
 
 func main() {
 	// Setup logger
-	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
+	logger.Init()
+
+	log.Infoln("Start candles loader.")
 
 	// Parse Arguments
 	flag.Parse()
 
-	log.Println("configurationFilePathPtr: ", configurationFilePathPtr)
+	log.Infoln("configurationFilePath: ", *configurationFilePathPtr)
 
 	// Init error var
 	var err error
@@ -38,7 +42,7 @@ func main() {
 	configurationFromFile, err = config.ReadFromFile(*configurationFilePathPtr)
 	// Check error
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
 	// Create database configuration
@@ -46,7 +50,7 @@ func main() {
 		Type:     configurationFromEnv.DbType,
 		User:     configurationFromEnv.DbUser,
 		Password: configurationFromEnv.DbPassword,
-		Hostname:  configurationFromEnv.DbHostname,
+		Hostname: configurationFromEnv.DbHostname,
 		Port:     configurationFromEnv.DbPort,
 		DbName:   configurationFromEnv.DbName}
 
@@ -54,14 +58,14 @@ func main() {
 	err = db.WaitDbInit(dbConfiguration, 10)
 	// Check error
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
 	// Read Global Rank Companies rating
 	globalRanks, err := globalrank.ReadGlobalRankCsv(configurationFromEnv.GlobalRankCsvFilePath)
 	// Check error
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
 	// Match global rank and Tinkoff instruments
@@ -71,14 +75,14 @@ func main() {
 	err = db.UploadNewInstrumentsIntoDB(dbConfiguration, globalRankInstuments)
 	// Check error
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
 	// Get latest loaded day from DB
 	lattestTimestamp, err := db.GetLattestLoadedDay(dbConfiguration, configurationFromFile.StartLoadDate)
 	// Check error
 	if err != nil {
-		log.Println("Lattest date in loaded days wasn't found")
+		log.Debug("Lattest date in loaded days wasn't found")
 		lattestTimestamp = configurationFromFile.StartLoadDate
 	}
 
@@ -95,10 +99,10 @@ func main() {
 
 		// Itterate over all days in sequence
 		for dateX, date := range daySequence {
-			log.Printf("Load data for date %d/%d: %v", dateX, len(daySequence), date)
+			log.Debugf("Load data for date %d/%d: %v", dateX, len(daySequence), date)
 			// Get candles for all instruments for one day
 			for instrumentX, instrument := range globalRankInstuments {
-				log.Printf("Load data for instrument %d/%d: '%v'", instrumentX, len(globalRankInstuments), instrument.Name)
+				log.Tracef("Load data for instrument %d/%d: '%v'", instrumentX, len(globalRankInstuments), instrument.Name)
 				// Get candles
 				candles, err := tinkoff.GetCandlesPerDay(configurationFromFile.ProductionToken,
 					instrument,
@@ -107,17 +111,16 @@ func main() {
 					configurationFromEnv.MaxAttempts)
 				// Check error
 				if err != nil {
-					log.Println("Maybe problem with production token: ",
+					log.Fatal("Maybe problem with production token: ",
 						configurationFromFile.ProductionToken,
 						" or Internet onnection.")
-					log.Fatalln(err)
 				}
 
 				// Load candles into DB
 				err = db.UploadCandlesIntoDB(dbConfiguration, candles)
 				// Check error
 				if err != nil {
-					log.Fatalln(err)
+					log.Fatal(err)
 				}
 			}
 
@@ -125,7 +128,7 @@ func main() {
 			err = db.UploadNewLoadedDayIntoDB(dbConfiguration, date)
 			// Check error
 			if err != nil {
-				log.Fatalln(err)
+				log.Fatal(err)
 			}
 		}
 
@@ -133,7 +136,7 @@ func main() {
 		lattestTimestamp, err = db.GetLattestLoadedDay(dbConfiguration, configurationFromFile.StartLoadDate)
 		// Check error
 		if err != nil {
-			log.Println("Lattest date in loaded days wasn't found")
+			log.Debug("Lattest date in loaded days wasn't found")
 			lattestTimestamp = configurationFromFile.StartLoadDate
 		}
 		// Go to next day
@@ -142,6 +145,8 @@ func main() {
 		// Wait next day
 		time.Sleep(1 * time.Hour)
 	}
+
+	log.Infoln("Stop candles loader.")
 }
 
 // MatchGlobalRankOnstruments match list of Global Rank and Tinkoff Instruments
@@ -149,10 +154,9 @@ func MatchGlobalRankOnstruments(globalRanks []globalrank.GlobalRank) (globalRank
 	// Get all Tinkoff Markets
 	instruments, err := tinkoff.GetAllMarkets(configurationFromFile.ProductionToken)
 	if err != nil {
-		log.Println("Maybe problem with production token: ",
+		log.Fatal("Maybe problem with production token: ",
 			configurationFromFile.ProductionToken,
 			" or Internet onnection.")
-		log.Fatalln(err)
 	}
 
 	// Match global rank and Tinkoff instruments
@@ -166,6 +170,6 @@ func MatchGlobalRankOnstruments(globalRanks []globalrank.GlobalRank) (globalRank
 		}
 	}
 
-	log.Printf("Founded %d/%d Tinkoff Instruments in GLobal Rank", len(globalRankInstruments), len(globalRanks))
+	log.Debugf("Founded %d/%d Tinkoff Instruments in GLobal Rank", len(globalRankInstruments), len(globalRanks))
 	return
 }

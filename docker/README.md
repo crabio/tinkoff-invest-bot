@@ -2,6 +2,8 @@
 
 ## Prepare
 
+Before running containers, run `global_rank_parser`
+
 For stopping all containers execute: `docker stop $(docker ps -a -q)`
 
 For removing all containers and data execute: `docker system prune --volumes`

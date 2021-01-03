@@ -1,9 +1,10 @@
 package db
 
 import (
-	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/date"
-	"log"
 	"time"
+
+	"github.com/iakrevetkho/tinkoff-invest-bot/candles_loader/internal/date"
+	log "github.com/sirupsen/logrus"
 )
 
 // DeleteUploadedDaysFromDay delete uploaded days from DB starts from specific day
@@ -21,7 +22,7 @@ func DeleteUploadedDaysFromDay(config Configuration, timestamp time.Time) (err e
 	starOfTheDay := date.BeginOfDay(timestamp)
 
 	// Copy candles from temp table into production
-	log.Println("Delete loaded days from: ", starOfTheDay)
+	log.Debugln("Delete loaded days from: ", starOfTheDay)
 	queryStr := `
 	DELETE FROM candle_loaded_day
 	WHERE day >= $1;`
@@ -50,7 +51,7 @@ func DeleteCandlesFromDay(config Configuration, timestamp time.Time) (err error)
 	starOfTheDay := date.BeginOfDay(timestamp)
 
 	// Copy candles from temp table into production
-	log.Println("Delete candles data from: ", starOfTheDay)
+	log.Debugln("Delete candles data from: ", starOfTheDay)
 	queryStr := `
 	DELETE FROM candle
 	WHERE ts >= $1;`

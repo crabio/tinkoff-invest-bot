@@ -2,8 +2,9 @@ package tinkoff
 
 import (
 	"context"
-	"log"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 )
@@ -17,7 +18,7 @@ func GetAllMarkets(token string) (instruments []sdk.Instrument, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Println("Get currency instruments")
+	log.Debugln("Get currency instruments")
 	// Example: USD000UTSTOM - USD, EUR_RUB__TOM - EUR
 	currencies, err := client.Currencies(ctx)
 	if err != nil {
@@ -29,7 +30,7 @@ func GetAllMarkets(token string) (instruments []sdk.Instrument, err error) {
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Println("Fet etf instruments")
+	log.Debugln("Fet etf instruments")
 	// Example: FXMM - Казначейские облигации США, FXGD - золото
 	etfs, err := client.ETFs(ctx)
 	if err != nil {
@@ -41,7 +42,7 @@ func GetAllMarkets(token string) (instruments []sdk.Instrument, err error) {
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Println("Get bond instruments")
+	log.Debugln("Get bond instruments")
 	// Example: SU24019RMFS0 - ОФЗ 24019
 	bonds, err := client.Bonds(ctx)
 	if err != nil {
@@ -53,7 +54,7 @@ func GetAllMarkets(token string) (instruments []sdk.Instrument, err error) {
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Println("Add stock instruments")
+	log.Debugln("Add stock instruments")
 	// Example: SBUX - Starbucks Corporation
 	stocks, err := client.Stocks(ctx)
 	if err != nil {
