@@ -7,12 +7,11 @@ from gym import spaces
 import pandas as pd
 import numpy as np
 
-MAX_NUM_SHARES = 2147483647
-MAX_OPEN_POSITIONS = 5
 MAX_STEPS = 20000
 
 INITIAL_ACCOUNT_BALANCE = 10000
 
+RESET_STEP_RANDOM_LIMIT = 100
 
 INSTRUMENTS_COUNT = 3
 
@@ -44,11 +43,11 @@ class StockTradingEnv(gym.Env):
         self.action_space = spaces.Box(
             low=np.array([0, 0, 0]), high=np.array([3, 3, MAX_QTY]), dtype=np.float16)
 
-        # Current price + metrics + stock balance + balance (12 X 3 + 3 + 1)
+        # Current price + metrics + stock balance + balance (10 X 3 + 3 + 1)
         #
         # [
         # "1_open", "1_close", "1_high", "1_low", "1_volume",
-        # "1_MACD_12_26_9", "1_MACDh_12_26_9", "1_MACDs_12_26_9", "1_RSI_14", "1_MFI_14", "1_qty", "1_cost",
+        # "1_MACD", "1_MACDh", "1_MACDs", "1_RSI", "1_MFI",
         # 2 ...
         # 3 ...
         # "1_qty"
@@ -57,7 +56,7 @@ class StockTradingEnv(gym.Env):
         # "available_balance"
         # ]
         self.observation_space = spaces.Box(
-            low=0, high=1, shape=(43,), dtype=np.float16)
+            low=0, high=1, shape=(34,), dtype=np.float16)
 
     def _next_observation(self):
         # Get current data
@@ -176,17 +175,19 @@ class StockTradingEnv(gym.Env):
             # Add worth
             self.overall_worth += self.stock_qty[i] * current_price
 
+        # Increase step counter
         self.current_step += 1
 
-        if self.current_step > len(self.df.loc[:, 'Open'].values) - 6:
-            self.current_step = 0
-
-        delay_modifier = (self.current_step / MAX_STEPS)
-
-        reward = self.balance * delay_modifier
-        done = self.overall_worth <= 0
-
+        # Get next observations
         obs = self._next_observation()
+
+        # Calc reward as bigger balance per time
+        reward = self.balance * (self.current_step / MAX_STEPS)
+
+        # Checks for done flag
+        # Step is last, or overall worth is negative
+        done = (self.current_step >= self.df.shape[0]) | (
+            self.overall_worth <= 0)
 
         return obs, reward, done, {}
 
@@ -199,9 +200,7 @@ class StockTradingEnv(gym.Env):
         self.overall_worth = self.balance
 
         # Set the current step to a random point within the data frame
-        # TODO Maybe we can get more efficcient way
-        self.current_step = random.randint(
-            0, len(self.df.loc[:, 'Open'].values) - 1)
+        self.current_step = random.randint(0, RESET_STEP_RANDOM_LIMIT)
 
         return self._next_observation()
 
