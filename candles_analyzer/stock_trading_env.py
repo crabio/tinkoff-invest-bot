@@ -17,7 +17,7 @@ INSTRUMENTS_COUNT = 3
 
 MAX_QTY = 1000000
 
-
+# TODO Add help
 class StockTradingEnv(gym.Env):
     """A stock trading environment for OpenAI gym"""
     metadata = {'render.modes': ['human']}
@@ -72,7 +72,7 @@ class StockTradingEnv(gym.Env):
 
     def step(self, action):
         # Parse: [<Action>, <StockIndex>, <Qty>]
-        action = action[0]
+        action_type = action[0]
         stock_index = action[1]
         qty = action[2]
 
@@ -86,7 +86,7 @@ class StockTradingEnv(gym.Env):
         # 0-1 - Sell
         # 1-2 - Hold
         # 2-3 - Buy
-        if action < 1:
+        if action_type < 1:
             # SELL
             logging.debug("SELL action")
 
@@ -125,7 +125,7 @@ class StockTradingEnv(gym.Env):
                 # Decrease current qty
                 self.stock_qty[stock_index] -= qty
 
-        elif action < 2:
+        elif action_type < 2:
             # HOLD
             logging.debug("HOLD action")
 
