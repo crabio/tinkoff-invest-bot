@@ -29,6 +29,8 @@ class StockTradingEnv(gym.Env):
         self.df = df
         # Declare array for stock qty
         self.stock_qty = np.array([0] * INSTRUMENTS_COUNT)
+        # Declare array for stock cost for reward calculation
+        self.stock_cost = np.array([0] * INSTRUMENTS_COUNT)
         # Declare balance
         self.balance = INITIAL_ACCOUNT_BALANCE
         # Overall worth balance + stocks
@@ -96,6 +98,10 @@ class StockTradingEnv(gym.Env):
             if current_qty == 0:
                 logging.debug(
                     "Try to sell stock #%d, but have nothing" % stock_index)
+
+                # Calc reward
+                reward = 0.0
+
             elif (current_qty - qty) <= 0:
                 logging.debug("We have %d stocks #%d, but try to sell %d. Sell all that we have." % (
                     current_qty, stock_index, qty))
@@ -108,8 +114,13 @@ class StockTradingEnv(gym.Env):
                 logging.debug("Sold %d stock #%d with price %f. Current balance %f." % (
                     self.stock_qty[stock_index], stock_index, current_price, self.balance))
 
+                # Calc reward as diff between prices
+                reward = 1.0 if ((self.stock_cost[stock_index] / self.stock_qty[stock_index]) < current_price) else 0.0
+
                 # Set current qty to zero
                 self.stock_qty[stock_index] = 0
+                # Set cost to zero
+                self.stock_cost[stock_index] = 0
             else:
                 logging.debug("We have %d stocks #%d and sell %d. Sell all that we have." % (
                     current_qty, stock_index, qty))
@@ -122,12 +133,20 @@ class StockTradingEnv(gym.Env):
                 logging.debug("Sold %d stock #%d with price %f. Current balance %f." % (
                     qty, stock_index, current_price, self.balance))
 
+                # Calc reward as diff between prices
+                reward = 1.0 if ((self.stock_cost[stock_index] / self.stock_qty[stock_index]) < current_price) else 0.0
+
                 # Decrease current qty
                 self.stock_qty[stock_index] -= qty
+                # Decrease cost as we can
+                self.stock_cost[stock_index] -= qty * current_price
 
         elif action_type < 2:
             # HOLD
             logging.debug("HOLD action")
+
+            # Calc reward
+            reward = 0.0
 
         else:
             # BUY
@@ -147,6 +166,8 @@ class StockTradingEnv(gym.Env):
                 self.balance -= max_qty * current_price
                 # Increase amount in balance
                 self.stock_qty[stock_index] += max_qty
+                # Increase cost
+                self.stock_cost[stock_index] += max_qty * current_price
 
                 logging.debug("Bought %d stocks #%d, with price %f. Balance: %f, qty: %d" % (
                     max_qty, stock_index, current_price, self.balance, self.stock_qty[stock_index]))
@@ -159,9 +180,15 @@ class StockTradingEnv(gym.Env):
                 self.balance -= qty * current_price
                 # Increase amount in balance
                 self.stock_qty[stock_index] += qty
+                # Increase cost
+                self.stock_cost[stock_index] += qty * current_price
 
                 logging.debug("Bought %d stocks #%d, with price %f. Balance: %f, qty: %d" % (
                     qty, stock_index, current_price, self.balance, self.stock_qty[stock_index]))
+
+            # Calc reward
+            reward = 0.0
+
 
         # Calc overall worth
         self.overall_worth = self.balance
@@ -181,15 +208,12 @@ class StockTradingEnv(gym.Env):
         # Get next observations
         obs = self._next_observation()
 
-        # Calc reward as bigger balance per time
-        reward = self.balance * (self.current_step / MAX_STEPS)
-
         # Checks for done flag
         # Step is last, or overall worth is negative
         done = (self.current_step >= self.df.shape[0]) | (
             self.overall_worth <= 0)
 
-        return obs, reward, done, {}
+        return obs, reward, done, {"step":self.current_step}
 
     def reset(self):
         # Declare array for stock qty
