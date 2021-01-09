@@ -14,7 +14,10 @@ class MacdSignal(Enum):
     GoDown = 3
 
 class TradingBot:
-    def __init__(self, stop_loss=0.05):
+    def __init__(self,
+                rsi_oversold_threshold=30,
+                rsi_overbought_threshold=70,
+                stop_loss=0.05):
         # RSI thresholds
         self._rsi_oversold_threshold = 30
         self._rsi_overbought_threshold = 70
