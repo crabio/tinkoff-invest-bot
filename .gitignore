@@ -6,3 +6,9 @@ config/*
 
 # ignore Jupyter checck points
 .ipynb_checkpoints
+
+# VSCode
+.vscode/
+
+# PyCache
+*.pyc
