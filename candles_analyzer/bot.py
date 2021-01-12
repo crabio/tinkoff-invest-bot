@@ -15,9 +15,15 @@ class MacdSignal(Enum):
 
 class TradingBot:
     def __init__(self,
+                initial_budget=1000,
+                broker_commission=0.0005,
                 rsi_oversold_threshold=30,
                 rsi_overbought_threshold=70,
                 stop_loss=0.05):
+        # Budget
+        self.initial_budget = initial_budget
+        # Commission
+        self.broker_commission = broker_commission
         # RSI thresholds
         self._rsi_oversold_threshold = 30
         self._rsi_overbought_threshold = 70
@@ -28,6 +34,11 @@ class TradingBot:
         self.reset()
     
     def reset(self):
+        # Budget
+        self.budget = self.initial_budget
+        # Bought price
+        self.bought_price = 0
+        self.bought_count = 0
         # init flags
         # RSI
         self._rsi_signal = RsiSignal.NaN
@@ -36,8 +47,6 @@ class TradingBot:
         self._macd_prev_diff = None
         self._macd_signal = MacdSignal.NaN
         
-        # Bought price
-        self.balance = 0
         # Profit
         self.profit = 0
         
@@ -78,44 +87,58 @@ class TradingBot:
 
 
     def _buy(self, current_price):
-        logging.debug("Step: %d Buy with price=%f" % (self.current_step, current_price))
-
-        # Set balance
-        self.balance = current_price
+        # Calc max amount
+        max_count = self.budget // current_price
+        # Check max available count
+        if (max_count > 0):
+            logging.debug("Step: %d Buy %d with price=%f" % (self.current_step, max_count, current_price))
         
+            # We can buy
+            self.budget -= (current_price * max_count) * (1 + self.broker_commission)
+            # Increrase count
+            self.bought_price += current_price * max_count
+            self.bought_count += max_count
+
     
     def _sell(self, current_price):
-        # Calc profit
-        profit = (current_price - self.balance) / self.balance
-
         # Check that we can sell
-        if self.balance != 0:
-            self.profit += profit
+        if self.bought_count != 0:
+            # Get profit
+            self.budget += (current_price * self.bought_count) * (1 - self.broker_commission)
+            # Calc profit
+            profit = (current_price * self.bought_count - self.bought_price) / self.bought_price
+            self.profit = (self.budget - self.initial_budget) / self.initial_budget
             
-            logging.debug("Step: %d Sell with price=%f and profit %.2f%% overall %.2f%%" % \
-                (self.current_step, current_price, profit * 100, self.profit * 100))
+            logging.debug("Step: %d Sell %d with price=%f with profit %.2f%% and overall %.2f%%" % \
+                (self.current_step, self.bought_count, current_price, profit * 100, self.profit * 100))
             
-            # Set balance
-            self.balance = 0
-        else:
-            logging.error("Can't sell, if we already sold.")
+            # Reset balance
+            self.bought_price = 0
+            self.bought_count = 0
         
 
     def _check_stop_loss(self, current_price):
         # Calc profit
-        profit = (current_price - self.balance) / self.balance
+        profit = (current_price * self.bought_count - self.bought_price) / self.bought_price
 
         if profit <= -self._stop_loss:
             # Sell
             # Set stop loss as profit
             profit = -self._stop_loss
-            self.profit += profit
+            current_price = (self.bought_price / self.bought_count) * (1 + profit)
+
+            # Get profit
+            self.budget += current_price * self.bought_count
+            # Calc profit
+            self.profit = (self.budget - self.initial_budget) / self.initial_budget
 
             logging.debug("Step: %d Stop loss %.2f%% from %.2f to %.2f with profit %.2f%% overall %.2f%%" % \
-                (self.current_step, -self._stop_loss, self.balance, current_price, profit * 100, self.profit * 100))
-            
-            # Set balance
-            self.balance = 0
+                (self.current_step, -self._stop_loss, self.bought_price / self.bought_count, current_price, profit * 100, self.profit * 100))
+
+            # Reset balance
+            self.bought_price = 0
+            self.bought_count = 0
+
 
 
     def process(self, data):
@@ -128,18 +151,16 @@ class TradingBot:
         # Set MACD signal
         self._set_macd_signal(data["MACD"], data["MACDs"])
 
-        if self.balance == 0:
-            # Try to find buy signal
-            if (self._rsi_signal == RsiSignal.OverSold) & (self._macd_signal == MacdSignal.GoUp):
-                # Buy
-                self._buy(current_price)
-
-        else:
-            # Try to find sell signal
-            if (self._rsi_signal == RsiSignal.OverBought) & (self._macd_signal == MacdSignal.GoDown):
-                # Sell
-                self._sell(current_price)
-            else:
-                # Check stop-loss
-                self._check_stop_loss(current_price)
-                
+        # Try to find buy signal
+        if (self._rsi_signal == RsiSignal.OverSold) & (self._macd_signal == MacdSignal.GoUp):
+            # Buy
+            self._buy(current_price)
+        # Try to find sell signal
+        elif (self._rsi_signal == RsiSignal.OverBought) & (self._macd_signal == MacdSignal.GoDown):
+            # Sell
+            self._sell(current_price)
+        
+        if self.bought_count > 0:
+            # Check stop-loss
+            self._check_stop_loss(current_price)
+            
