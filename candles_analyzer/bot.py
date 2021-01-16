@@ -70,11 +70,11 @@ class TradingBot:
                 # MACD flag conditions
                 # GoUp - \_/
                 # GoDown - /─\
-                if (self._macd_prev_diff <= 0) & (macd_diff > 0) & (macd_signal_value < 0):
+                if (self._macd_prev_diff <= 0) & (macd_diff > 0):
                     # GoUp
                     # Buy
                     self._macd_signal = MacdSignal.GoUp
-                elif (self._macd_prev_diff >= 0) & (macd_diff < 0) & (macd_signal_value > 0):
+                elif (self._macd_prev_diff >= 0) & (macd_diff < 0):
                     # GoDown
                     # Sell
                     self._macd_signal = MacdSignal.GoDown
@@ -123,17 +123,13 @@ class TradingBot:
 
         if profit <= -self._stop_loss:
             # Sell
-            # Set stop loss as profit
-            profit = -self._stop_loss
-            current_price = (self.bought_price / self.bought_count) * (1 + profit)
-
             # Get profit
             self.budget += current_price * self.bought_count
             # Calc profit
             self.profit = (self.budget - self.initial_budget) / self.initial_budget
 
             logging.debug("Step: %d Stop loss %.2f%% from %.2f to %.2f with profit %.2f%% overall %.2f%%" % \
-                (self.current_step, -self._stop_loss, self.bought_price / self.bought_count, current_price, profit * 100, self.profit * 100))
+                (self.current_step, -self._stop_loss * 100, self.bought_price / self.bought_count, current_price, profit * 100, self.profit * 100))
 
             # Reset balance
             self.bought_price = 0
@@ -143,7 +139,8 @@ class TradingBot:
 
     def process(self, data):
         self.current_step += 1
-        current_price = random.uniform(data["open_price"],data["close_price"])
+        # current_price = random.uniform(data["open_price"],data["close_price"])
+        current_price = data["close_price"]
         
         # Set RSI signal
         self._set_rsi_signal(data["RSI"])
