@@ -99,6 +99,9 @@ class TradingBot:
             self.bought_price += current_price * max_count
             self.bought_count += max_count
 
+            return True
+
+        return False
     
     def _sell(self, current_price):
         # Check that we can sell
@@ -115,6 +118,10 @@ class TradingBot:
             # Reset balance
             self.bought_price = 0
             self.bought_count = 0
+
+            return True
+
+        return False
         
 
     def _check_stop_loss(self, current_price):
@@ -135,9 +142,20 @@ class TradingBot:
             self.bought_price = 0
             self.bought_count = 0
 
+            return True
+
+        return False
+
 
 
     def process(self, data):
+        """
+        Returns
+        0 - Hold
+        1 - Buy
+        2 - Sell
+        """
+
         self.current_step += 1
         # current_price = random.uniform(data["open_price"],data["close_price"])
         current_price = data["close_price"]
@@ -151,13 +169,43 @@ class TradingBot:
         # Try to find buy signal
         if (self._rsi_signal == RsiSignal.OverSold) & (self._macd_signal == MacdSignal.GoUp):
             # Buy
-            self._buy(current_price)
+            result = self._buy(current_price)
+
+            # Return result of processing
+            if (result):
+                # Successfull buy
+                return 1
+            else:
+                # Hold
+                return 0
+
         # Try to find sell signal
         elif (self._rsi_signal == RsiSignal.OverBought) & (self._macd_signal == MacdSignal.GoDown):
             # Sell
-            self._sell(current_price)
+            result = self._sell(current_price)
+
+            # Return result of processing
+            if (result):
+                # Successfull sell
+                return 2
+            else:
+                # Hold
+                return 0
         
         if self.bought_count > 0:
             # Check stop-loss
-            self._check_stop_loss(current_price)
+            result = self._check_stop_loss(current_price)
+
+            # Return result of processing
+            if (result):
+                # Successfull sell
+                return 2
+            else:
+                # Hold
+                return 0
+
+        # Hold
+        return 0
+
+        
             
