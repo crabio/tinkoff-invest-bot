@@ -19,14 +19,17 @@ class TradingBot:
                 broker_commission=0.0005,
                 rsi_oversold_threshold=30,
                 rsi_overbought_threshold=70,
+                macd_threshold=0.001,
                 stop_loss=0.05):
         # Budget
         self.initial_budget = initial_budget
         # Commission
         self.broker_commission = broker_commission
         # RSI thresholds
-        self._rsi_oversold_threshold = 30
-        self._rsi_overbought_threshold = 70
+        self._rsi_oversold_threshold = rsi_oversold_threshold
+        self._rsi_overbought_threshold = rsi_overbought_threshold
+        # MACD threshold
+        self._macd_threshold = macd_threshold
 
         # Stop loss
         self._stop_loss = stop_loss
@@ -41,10 +44,11 @@ class TradingBot:
         self.bought_count = 0
         # init flags
         # RSI
+        self._rsi_k_prev_value = None
+        self._rsi_d_prev_value = None
         self._rsi_signal = RsiSignal.NaN
         # MACD
         self._macd_prev_value = None
-        self._macd_prev_diff = None
         self._macd_signal = MacdSignal.NaN
         
         # Profit
@@ -52,35 +56,40 @@ class TradingBot:
         
         self.current_step = 0
 
-    def _set_rsi_signal(self, rsi_value):
-        # RSI flag conditions
-        if rsi_value > self._rsi_overbought_threshold:
-            self._rsi_signal = RsiSignal.OverBought
-        elif rsi_value < self._rsi_oversold_threshold:
-            self._rsi_signal = RsiSignal.OverSold
+    def _set_rsi_signal(self, rsi_k_value, rsi_d_value):
 
-    def _set_macd_signal(self, macd_value, macd_signal_value):
+        # Check that we have prev value
+        if (self._rsi_k_prev_value is not None) &\
+            (self._rsi_d_prev_value is not None):
+            # RSI flag conditions
+            if (self._rsi_k_prev_value <= self._rsi_oversold_threshold) &\
+                (self._rsi_k_prev_value <= self._rsi_d_prev_value) &\
+                (rsi_k_value > rsi_d_value):
+                self._rsi_signal = RsiSignal.OverSold
+            if (self._rsi_k_prev_value >= self._rsi_overbought_threshold) &\
+                (self._rsi_k_prev_value >= self._rsi_d_prev_value) &\
+                (rsi_k_value < rsi_d_value):
+                self._rsi_signal = RsiSignal.OverBought
+
+        # Save value as previous
+        self._rsi_k_prev_value = rsi_k_value
+        self._rsi_d_prev_value = rsi_d_value
+
+
+    def _set_macd_signal(self, macd_value):
         # Check that we have prev value for diff
         if self._macd_prev_value is not None:
-            # Calc MACD diff
-            macd_diff = macd_value - self._macd_prev_value
-
-            # Check that we have prev diff for condition
-            if self._macd_prev_diff is not None:
-                # MACD flag conditions
-                # GoUp - \_/
-                # GoDown - /─\
-                if (self._macd_prev_diff <= 0) & (macd_diff > 0):
-                    # GoUp
-                    # Buy
-                    self._macd_signal = MacdSignal.GoUp
-                elif (self._macd_prev_diff >= 0) & (macd_diff < 0):
-                    # GoDown
-                    # Sell
-                    self._macd_signal = MacdSignal.GoDown
-
-            # Save current diff value as previous
-            self._macd_prev_diff = macd_diff
+            # MACD flag conditions
+            # GoUp - \_/
+            # GoDown - /─\
+            if (self._macd_prev_value <= 0) & (macd_value > self._macd_threshold):
+                # GoUp
+                # Buy
+                self._macd_signal = MacdSignal.GoUp
+            elif (self._macd_prev_value >= 0) & (macd_value < -self._macd_threshold):
+                # GoDown
+                # Sell
+                self._macd_signal = MacdSignal.GoDown
 
         # Save current value as previous
         self._macd_prev_value = macd_value
@@ -148,7 +157,12 @@ class TradingBot:
 
 
 
-    def process(self, data):
+    def process(self,
+                open_price,
+                close_price,
+                rsi_k_value,
+                rsi_d_value,
+                macd_h_value):
         """
         Returns
         0 - Hold
@@ -157,17 +171,18 @@ class TradingBot:
         """
 
         self.current_step += 1
-        # current_price = random.uniform(data["open_price"],data["close_price"])
-        current_price = data["close_price"]
+        # current_price = random.uniform(open_price, close_price)
+        current_price = close_price
         
         # Set RSI signal
-        self._set_rsi_signal(data["RSI"])
+        self._set_rsi_signal(rsi_k_value, rsi_d_value)
 
         # Set MACD signal
-        self._set_macd_signal(data["MACD"], data["MACDs"])
+        self._set_macd_signal(macd_h_value)
 
-        # Try to find buy signal
-        if (self._rsi_signal == RsiSignal.OverSold) & (self._macd_signal == MacdSignal.GoUp):
+        # Buy only if MACD and RSI is ok in this point
+        #  & (self._macd_signal == MacdSignal.GoUp)
+        if (self._rsi_signal == RsiSignal.OverSold):
             # Buy
             result = self._buy(current_price)
 
@@ -179,8 +194,9 @@ class TradingBot:
                 # Hold
                 return 0
 
-        # Try to find sell signal
-        elif (self._rsi_signal == RsiSignal.OverBought) & (self._macd_signal == MacdSignal.GoDown):
+        # Buy if MACD or RSI is ok in this point
+        #  & (self._macd_signal == MacdSignal.GoDown))
+        elif (self._rsi_signal == RsiSignal.OverBought):
             # Sell
             result = self._sell(current_price)
 

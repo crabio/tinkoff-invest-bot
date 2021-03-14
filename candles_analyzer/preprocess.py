@@ -17,13 +17,6 @@ def preprocess_data(df):
         "MACDh_12_26_9": "MACDh",
         "STOCHRSIk_14_14_3_3": "RSI"})
 
-    # Shift MACD signals
-    # TEST!!!
-    shift_count = 4
-    df["MACD"] = df["MACD"].shift(-shift_count)
-    df["MACDs"] = df["MACDs"].shift(-shift_count)
-    df["MACDh"] = df["MACDh"].shift(-shift_count)
-
     # Calc RSI signals
     RSI_oversold_threshold = 20
     RSI_overbouht_threshold = 80

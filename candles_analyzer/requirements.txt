@@ -4,3 +4,5 @@ pandas_ta==0.2.23b
 joblib
 tensorflow==2.4.0
 scikit-learn==0.24.0 
+seaborn
+mplfinance
